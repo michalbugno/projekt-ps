@@ -1,3 +1,6 @@
+#ifndef AIDS_H
+#define AIDS_H
+
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/init.h>
@@ -11,3 +14,5 @@ MODULE_DESCRIPTION("Statistical Anomaly IDS");
 
 module_init(aids_init);
 module_exit(aids_exit);
+
+#endif
