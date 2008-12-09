@@ -4,6 +4,7 @@ referat/referat.pdf
 *.cmd
 *.ko
 aids.mod.c
+device.mod.c
 modules.order
 Module.symvers
 .tmp_versions
