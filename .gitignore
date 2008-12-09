@@ -1,2 +1,9 @@
 referat/referat.pdf
 *.swp
+*.o
+*.cmd
+*.ko
+aids.mod.c
+modules.order
+Module.symvers
+.tmp_versions
