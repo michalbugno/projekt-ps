@@ -8,3 +8,9 @@ device.mod.c
 modules.order
 Module.symvers
 .tmp_versions
+referat/*.aux
+referat/*.log
+referat/*.nav
+referat/*.out
+referat/*.snm
+referat/*.toc
