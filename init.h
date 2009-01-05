@@ -1,5 +1,5 @@
-#ifndef AIDS_H
-#define AIDS_H
+#ifndef INIT_H
+#define INIT_H
 
 #include <linux/module.h>
 #include <linux/kernel.h>

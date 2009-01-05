@@ -1,3 +1,4 @@
+#include <asm/uaccess.h>
 #include "device.h"
 
 struct file_operations fops =
@@ -11,6 +12,13 @@ struct file_operations fops =
 
 ssize_t device_read(struct file *filp, char *buffer, size_t size, loff_t *loff)
 {
+	int err;
+
+	err = copy_to_user(buffer, "oh my\n", 7);
+	if (err != 0)
+	{
+		printk("Couldn't copy %d bytes\n", err);
+	}
 	return 0;
 }
 

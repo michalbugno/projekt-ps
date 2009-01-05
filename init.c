@@ -1,5 +1,5 @@
 #include "device.h"
-#include "aids.h"
+#include "init.h"
 
 int aids_device_number;
 
@@ -9,11 +9,11 @@ static int aids_init(void)
 	aids_device_number = register_chrdev(0, "aids", &fops);
 	if (aids_device_number < 0)
 	{
-		printk("Couldn't register character device\n");
+		printk(KERN_ALERT "Couldn't register character device\n");
 		return -1;
 	} else
 	{
-		printk("Registered device under '%d'\n", aids_device_number);
+		printk(KERN_ALERT "Registered device under '%d'\n", aids_device_number);
 	}
 	return 0;
 }
