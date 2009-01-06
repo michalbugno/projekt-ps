@@ -1,8 +1,13 @@
-obj-m += aids.o
-aids-objs := init.o device.o
+CFLAGS = -Wall
+LDFLAGS = -lpcap
 
-all:
-	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
+all: aids
+
+aids: main.c network.o
+	$(CC) $(CFLAGS) $(LDFLAGS) -o aids main.c network.o
+
+network.o: network.c
+	$(CC) $(CFLAGS) -c -o network.o network.c
 
 clean:
-	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) clean
+	rm -rf *.o
