@@ -2,6 +2,14 @@
 #define NETWORK_H
 
 #include <pcap.h>
+#include <string.h>
+
+struct network_stats
+{
+	struct timeval start;
+	struct timeval finish;
+	unsigned int length;
+};
 
 char errbuf[PCAP_ERRBUF_SIZE];
 

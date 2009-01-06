@@ -2,6 +2,11 @@
 
 int main(int argc, char **argv)
 {
-	network_usage("en1");
+	int i;
+
+	for (i = 0; i < 1000; i++)
+	{
+		network_usage("en1");
+	}
 	return 0;
 }
