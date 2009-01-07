@@ -1,8 +1,19 @@
 #include "network.h"
 #include "system.h"
+#include <unistd.h>
 
 int main(int argc, char **argv)
 {
+	pid_t pid;
+	FILE *f;
+	pid = fork();
+
+	if(pid < 0) exit(1);
+	if(pid > 1)
+	{
+		printf("%d\n", pid);
+		exit(0);
+	}
 	int i, r;
 	struct network_traffic traffic;
 	struct load_average load_avg;
