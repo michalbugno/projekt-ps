@@ -1,6 +1,6 @@
 #include "network.h"
 
-long network_usage(const char *dev)
+void network_usage(const char *dev, struct network_traffic *traffic)
 {
 	pcap_t *handle;
 	struct network_stats stats;
@@ -14,7 +14,7 @@ long network_usage(const char *dev)
 	if (handle == NULL)
 	{
 		fprintf(stderr, "Couldn't open device %s: %s\n", dev, errbuf);
-		return(1);
+		return;
 	}
 
 	memset(&stats, 0, sizeof(struct network_stats));
@@ -37,10 +37,13 @@ long network_usage(const char *dev)
 
 	seconds = (stats.finish.tv_sec - stats.start.tv_sec) * 1000000 + (stats.finish.tv_usec - stats.start.tv_usec);
 	seconds /= 1000000;
-	printf("Size: %d, seconds: %.4g, avg speed: %.5g kb/s\n", stats.length, seconds, (double)stats.length / seconds / 1000);
-
 	pcap_close(handle);
-	return(0);
+
+	/*
+	 * return kb/s
+	 */
+	traffic -> in = stats.length / seconds / 1000.0;
+	traffic -> out = stats.length / seconds / 1000.0;
 }
 
 void got_packet(u_char *args, const struct pcap_pkthdr *header, const u_char *packet)

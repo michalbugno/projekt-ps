@@ -11,9 +11,15 @@ struct network_stats
 	unsigned int length;
 };
 
+struct network_traffic
+{
+	double in;
+	double out;
+};
+
 char errbuf[PCAP_ERRBUF_SIZE];
 
-long network_usage(const char *);
+void network_usage(const char *, struct network_traffic *);
 void got_packet(u_char *, const struct pcap_pkthdr *, const u_char *);
 
 #endif
