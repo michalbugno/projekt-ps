@@ -1,11 +1,24 @@
+#include <unistd.h>
+#include <signal.h>
 #include "network.h"
 #include "system.h"
-#include <unistd.h>
+
+int eradicate(int pid)
+{
+	if(kill((pid_t)pid, SIGKILL) == 0) 
+	{
+		return 1;
+	} 
+	else
+	{
+		return 0;
+	}
+}
 
 int main(int argc, char **argv)
 {
 	pid_t pid;
-	FILE *f;
+	
 	pid = fork();
 
 	if(pid < 0) exit(1);
