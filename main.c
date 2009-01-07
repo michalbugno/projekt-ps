@@ -1,19 +1,50 @@
 #include "network.h"
 #include "system.h"
+#include "main.h"
 #include <unistd.h>
 
 int main(int argc, char **argv)
 {
 	pid_t pid;
 	FILE *f;
-	pid = fork();
 
-	if(pid < 0) exit(1);
-	if(pid > 1)
+	dispatch_from_args(argc, argv);
+
+	pid = fork();
+	if (pid < 0) exit(1);
+	if (pid > 1)
 	{
 		printf("%d\n", pid);
 		exit(0);
 	}
+	return 0;
+}
+
+int dispatch_from_args(int argc, char **argv)
+{
+	int c;
+	while ((c = getopt(argc, argv, "k:")) != -1)
+	{
+		switch (c)
+		{
+			case 'k':
+				break;
+
+			case '?':
+				printf("Usage: %s [-k]\n", argv[0]);
+				break;
+
+			default:
+				do_run();
+				break;
+		}
+	}
+
+	return c;
+}
+
+void do_run(void)
+{
 	int i, r;
 	struct network_traffic traffic;
 	struct load_average load_avg;
@@ -26,5 +57,4 @@ int main(int argc, char **argv)
 			printf("Usage: %.4g %.4g %.4g\n", load_avg.data[0], load_avg.data[1], load_avg.data[2]);
 		printf("Average network usage: %.4g kb/s in, %.4g kb/s out\n", traffic.in, traffic.out);
 	}
-	return 0;
 }
