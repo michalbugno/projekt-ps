@@ -1,12 +1,20 @@
-#include "network.h"
-#include "system.h"
-#include "main.h"
 #include <unistd.h>
+#include <signal.h>
+#include "network.h"
+#include "main.h"
+#include "system.h"
+
+int eradicate(int pid)
+{
+	return kill((pid_t)pid, SIGKILL) != 0;
+}
 
 int main(int argc, char **argv)
 {
 	pid_t pid;
 	FILE *f;
+	
+	pid = fork();
 
 	dispatch_from_args(argc, argv);
 
