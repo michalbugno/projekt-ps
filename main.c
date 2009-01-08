@@ -4,6 +4,9 @@
 #include "main.h"
 #include "system.h"
 
+/*
+ * kills process with pid written to the file
+ */
 int eradicate(const char *filename)
 {
 	FILE *file;
@@ -33,6 +36,9 @@ int main(int argc, char **argv)
 	return 0;
 }
 
+/*
+ * using getopt we dispatch the right code
+ */
 int dispatch_from_args(int argc, char **argv)
 {
 	int c;
@@ -63,6 +69,9 @@ int dispatch_from_args(int argc, char **argv)
 
 }
 
+/*
+ * function which is executed when simply starting aids
+ */
 void do_run(void)
 {
 	pid_t pid;
@@ -70,28 +79,46 @@ void do_run(void)
 	struct load_average load_avg;
 	FILE *f;
 
-	pid = fork();
-	if (pid < 0) exit(1);
-	if (pid > 1)
+	/*
+	 * check if PID_FILE exists, if yes, then the server is already running
+	 */
+	f = fopen(PID_FILE, "r");
+	if (f != NULL)
 	{
-		f = fopen(PID_FILE, "r");
-		if (f != NULL)
-		{
-			printf("Pid file exists! Not starting server... (remove pid file %s if the server is not running)\n", PID_FILE);
-			fclose(f);
-		} else
+		/*
+		 * print info and don't do anything
+		 */
+		printf("Pid file exists! Not starting server... (remove pid file %s if the server is not running)\n", PID_FILE);
+		fclose(f);
+		exit(0);
+	} else
+	{
+		pid = fork();
+		/*
+		 * fork error
+		 */
+		if (pid < 0) exit(1);
+
+		/*
+		 * parent process -- write pid file and exit
+		 */
+		if (pid > 0)
 		{
 			fclose(f);
 			f = fopen(PID_FILE, "w");
 			fprintf(f, "%d\n", pid);
 			fclose(f);
+			exit(0);
+		} else
+		{
+			/*
+			 * child process -- do the stuff
+			 */
+			while (1)
+			{
+				network_usage("en1", &traffic);
+				load_average(&load_avg);
+			}
 		}
-		exit(0);
-	}
-
-	while (1)
-	{
-		network_usage("en1", &traffic);
-		load_average(&load_avg);
 	}
 }
