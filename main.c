@@ -4,7 +4,7 @@
 #include "main.h"
 #include "system.h"
 
-int kill_master(const char *filename)
+int eradicate(const char *filename)
 {
 	FILE *file;
 	int pid;
@@ -17,7 +17,7 @@ int kill_master(const char *filename)
 	}
 
 	fscanf(file, "%d", &pid);
-	if (eradicate(pid) != 0)
+	if (kill((pid_t)pid, SIGKILL) != 0)
 	{
 		printf("Couldn't kill process %d\n", pid);
 		return -1;
@@ -25,11 +25,6 @@ int kill_master(const char *filename)
 	fclose(file);
 	unlink(filename);
 	return 1;
-}
-
-int eradicate(const int pid)
-{
-	return kill((pid_t)pid, SIGKILL) != 0;
 }
 
 int main(int argc, char **argv)
@@ -44,6 +39,7 @@ int dispatch_from_args(int argc, char **argv)
 
 	if (argc == 1)
 	{
+		printf("Starting aids...\n");
 		do_run();
 		return 1;
 	} else
@@ -54,11 +50,11 @@ int dispatch_from_args(int argc, char **argv)
 			{
 				case 'k':
 					printf("Killing server...\n");
-					kill_master("aids.pid");
+					eradicate(PID_FILE);
 					break;
 
 				case '?':
-					printf("Usage: %s [-k]\n", argv[0]);
+					printf("Usage: %s [-k]\n\n-k kill working aids server", argv[0]);
 					break;
 			}
 		}
@@ -78,15 +74,15 @@ void do_run(void)
 	if (pid < 0) exit(1);
 	if (pid > 1)
 	{
-		f = fopen("aids.pid", "r");
+		f = fopen(PID_FILE, "r");
 		if (f != NULL)
 		{
-			printf("Pid file exists! Not starting server...\n");
+			printf("Pid file exists! Not starting server... (remove pid file %s if the server is not running)\n", PID_FILE);
 			fclose(f);
 		} else
 		{
 			fclose(f);
-			f = fopen("aids.pid", "w");
+			f = fopen(PID_FILE, "w");
 			fprintf(f, "%d\n", pid);
 			fclose(f);
 		}
