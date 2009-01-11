@@ -64,7 +64,9 @@ void aids_gather_network(void)
 
 	while (1)
 	{
+		printf("Gathering network...");
 		network_usage("en1", &traffic);
+		printf(" done\n");
 		sleep(aids_conf.network_timeout);
 	}
 }

@@ -1,8 +1,6 @@
 #ifndef SYSTEM_H
 #define SYSTEM_H
 
-#include <stdlib.h>
-
 struct load_average
 {
 	unsigned int measures;
@@ -10,5 +8,6 @@ struct load_average
 };
 
 int load_average(struct load_average *);
+void aids_gather_processor_load(void);
 
 #endif

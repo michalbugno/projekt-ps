@@ -1,4 +1,3 @@
  * modify network sniffer to gather in and out data separately
- * write gather methods -- should be infinite and gather data every defined number of seconds
  * write global gather method which will run gather methods in separate threads and write down data to some file
  * roughly: analize gathered data

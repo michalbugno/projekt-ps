@@ -1,5 +1,5 @@
 CFLAGS = -Wall -Iinclude -Llib
-LDFLAGS = -lpcap -lc -lconfig
+LDFLAGS = -lpcap -lc -lconfig -lpthread
 
 all: aids
 

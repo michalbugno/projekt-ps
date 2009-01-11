@@ -1,6 +1,8 @@
 #include <unistd.h>
 #include <signal.h>
 #include <libconfig.h>
+#include <pthread.h>
+#include <stdlib.h>
 #include "network.h"
 #include "main.h"
 #include "system.h"
@@ -83,9 +85,9 @@ int dispatch_from_args(int argc, char **argv)
 void do_run(void)
 {
 	pid_t pid;
-	struct network_traffic traffic;
-	struct load_average load_avg;
+	pthread_t threads[2];
 	FILE *f;
+	int rc;
 
 	/*
 	 * check if PID_FILE exists, if yes, then the server is already running
@@ -122,8 +124,20 @@ void do_run(void)
 			/*
 			 * child process -- do the stuff
 			 */
-			network_usage("en1", &traffic);
-			load_average(&load_avg);
+			rc = pthread_create(&threads[0], NULL, (void *)aids_gather_network, NULL);
+			if (rc != 0)
+			{
+				printf("Couldn't create thread, exiting (%d)\n", rc);
+				exit(-1);
+			}
+			rc = pthread_create(&threads[1], NULL, (void *)aids_gather_processor_load, NULL);
+			if (rc != 0)
+			{
+				printf("Couldn't create thread, exiting (%d)\n", rc);
+				exit(-1);
+			}
+			pthread_join(threads[0], NULL);
+			pthread_join(threads[1], NULL);
 		}
 	}
 }
