@@ -14,9 +14,19 @@ struct aids_global_conf
 	int network_timeout;
 
 	/**
-	 * Number of seconds every each the network data will be gathered
+	 * Number of seconds every each the processor load data will be gathered
 	 */
 	int processor_timeout;
+
+	/**
+	 * Number of network data nodes kept as 'recent'
+	 */
+	int recent_network;
+	
+	/**
+	 * Number of processor load data nodes kept as 'recent'
+	 */
+	int recent_processor;
 
 	/**
 	 * Name of the file containing pid of spawned process.

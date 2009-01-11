@@ -174,7 +174,7 @@ const char *read_conf(const char *filename)
 	int r;
 	config_t cfg;
 	const char *pid_file;
-	int network_timeout, processor_timeout;
+	int network_timeout, processor_timeout, recent_network, recent_processor;
 
 	r = config_read_file(&cfg, filename);
 
@@ -193,6 +193,14 @@ const char *read_conf(const char *filename)
 		processor_timeout = config_lookup_int(&cfg, "timeouts:processor");
 		if (processor_timeout <= 0) processor_timeout = 10;
 		aids_conf.processor_timeout = processor_timeout;
+
+		recent_network = config_lookup_int(&cfg, "recent_data:network");
+		if (recent_network <= 0) recent_network = 100;
+		aids_conf.recent_network = recent_network;
+
+		recent_processor = config_lookup_int(&cfg, "recent_data:processor");
+		if (recent_processor <= 0) recent_processor = 100;
+		aids_conf.recent_processor = recent_processor;
 
 		return NULL;
 	} else
