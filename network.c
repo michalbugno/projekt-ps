@@ -83,12 +83,23 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header, const u_char *pa
 void aids_gather_network(void)
 {
 	struct network_traffic traffic;
+	int i;
+	FILE* data_file;
+
 
 	while (1)
 	{
-		printf("Gathering network...");
-		network_usage("en1", &traffic);
-		printf(" done\n");
+		data_file = fopen("data/current_traffic.dat", "w");
+		fclose(data_file);
+		
+		for(i = 0; i < aids_conf.recent_network ; i += 1)
+		{
+			network_usage("en1", &traffic);
+			data_file = fopen("data/current_traffic.dat", "a");
+			fprintf(data_file, "%g,%g\n", traffic.in, traffic.out);
+			fclose(data_file);
+		}
+
 		sleep(aids_conf.network_timeout);
 	}
 }

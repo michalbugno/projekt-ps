@@ -38,12 +38,26 @@ int load_average(struct load_average *avg)
 void aids_gather_processor_load(void)
 {
 	struct load_average load;
+	int i,j;
+	FILE* data_file;
 
 	while (1)
 	{
-		printf("Gathering load...");
-		load_average(&load);
-		printf(" done\n");
-		sleep(aids_conf.processor_timeout);
+		data_file = fopen("data/current_load.dat", "w");
+		fclose(data_file);
+		for(i = 0; i < aids_conf.recent_processor ; i += 1)
+		{
+			load_average(&load);
+			data_file = fopen("data/current_load.dat", "a");
+			fprintf(data_file,"%d,", load.measures);
+			for(j = 0; j < load.measures-1 ; j+=1)
+			{
+				fprintf(data_file,"%g,", load.data[j]);
+			}
+			fprintf(data_file, "%g\n", load.data[load.measures-1]);
+			fclose(data_file);
+			sleep(aids_conf.processor_timeout);
+		}
+		
 	}
 }
