@@ -32,6 +32,8 @@ int load_average(struct load_average *avg)
 
 /**
  * Infinite loop gathering network data. This method shall be ran threaded.
+ *
+ * \todo This method should write the data to some file.
  */
 void aids_gather_processor_load(void)
 {

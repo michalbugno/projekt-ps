@@ -9,6 +9,8 @@ extern struct aids_global_conf aids_conf;
  *
  * @param dev string name of network device which shall be sniffed.
  * @param traffic pointer to an initialized structure to which the data will be saved.
+ *
+ * \todo Modify network sniffer to gather in and out data separately.
  */
 void network_usage(const char *dev, struct network_traffic *traffic)
 {
@@ -75,6 +77,8 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header, const u_char *pa
  * Used to gather network data every defined number of seconds.
  *
  * @see do_run
+ *
+ * \todo This method should write the data to some file.
  */
 void aids_gather_network(void)
 {

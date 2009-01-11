@@ -35,6 +35,9 @@ int eradicate(const char *filename)
 	return 1;
 }
 
+/**
+ * \todo Roughly: analize gathered data.
+ */
 int main(int argc, char **argv)
 {
 	dispatch_from_args(argc, argv);
