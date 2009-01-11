@@ -7,6 +7,20 @@
 #include "main.h"
 #include "system.h"
 
+/** \mainpage AIDS - Anomaly IDS
+ *
+ * \section intro What does it do?
+ * AIDS is anomaly Intrusion Detection System. It runs as a daemon which gathers
+ * data and writes it to files.
+ *
+ * \section authors Authors
+ * Michal Bugno
+ * Antek Piechnik
+ *
+ *
+ * \todo Roughly: analize gathered data.
+ */
+
 /**
  * Kills process with pid written to file.
  *
@@ -35,9 +49,6 @@ int eradicate(const char *filename)
 	return 1;
 }
 
-/**
- * \todo Roughly: analize gathered data.
- */
 int main(int argc, char **argv)
 {
 	dispatch_from_args(argc, argv);
