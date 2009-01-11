@@ -4,16 +4,40 @@
 #include <pcap.h>
 #include <string.h>
 
+/**
+ * Structure holding packet info gathered by network filter.
+ */
 struct network_stats
 {
+	/**
+	 * Time when the gathering started.
+	 */
 	struct timeval start;
+
+	/**
+	 * Time when the gathering finished.
+	 */
 	struct timeval finish;
+
+	/**
+	 * Number of bytes gathered.
+	 */
 	unsigned int length;
 };
 
+/**
+ * Structure returned by gathering method.
+ */
 struct network_traffic
 {
+	/**
+	 * Incoming network usage (kb/s).
+	 */
 	double in;
+
+	/**
+	 * Outgoing network usage (kb/s).
+	 */
 	double out;
 };
 

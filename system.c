@@ -6,6 +6,12 @@
 
 extern struct aids_global_conf aids_conf;
 
+/**
+ * Gathers processor load average like the one from uptime shell method.
+ *
+ * @param avg pointer to initialized structure where the output shall be saved.
+ * @returns 0 if everything ok, -1 if getting load failed.
+ */
 int load_average(struct load_average *avg)
 {
 	int r, i;
@@ -20,10 +26,13 @@ int load_average(struct load_average *avg)
 		avg -> measures = r;
 		for (i = 0; i < r; i++)
 			avg -> data[i] = load_avg[i];
-		return 1;
+		return 0;
 	}
 }
 
+/**
+ * Infinite loop gathering network data. This method shall be ran threaded.
+ */
 void aids_gather_processor_load(void)
 {
 	struct load_average load;

@@ -4,6 +4,12 @@
 
 extern struct aids_global_conf aids_conf;
 
+/**
+ * Method to gather network data to a structure.
+ *
+ * @param dev string name of network device which shall be sniffed.
+ * @param traffic pointer to an initialized structure to which the data will be saved.
+ */
 void network_usage(const char *dev, struct network_traffic *traffic)
 {
 	pcap_t *handle;
@@ -50,6 +56,13 @@ void network_usage(const char *dev, struct network_traffic *traffic)
 	traffic -> out = stats.length / seconds / 1000.0;
 }
 
+/**
+ * Callback used by pcap when receiving a single packet.
+ *
+ * @param args argument registered in pcap_loop
+ * @param header structure holding packet header (most important info)
+ * @param packet structure with all the info about packet
+ */
 void got_packet(u_char *args, const struct pcap_pkthdr *header, const u_char *packet)
 {
 	struct network_stats *stats;
@@ -58,6 +71,11 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header, const u_char *pa
 	stats -> length += header -> len;
 }
 
+/**
+ * Used to gather network data every defined number of seconds.
+ *
+ * @see do_run
+ */
 void aids_gather_network(void)
 {
 	struct network_traffic traffic;

@@ -7,8 +7,10 @@
 #include "main.h"
 #include "system.h"
 
-/*
- * kills process with pid written to the file
+/**
+ * Kills process with pid written to file.
+ *
+ * @param filename name of the file where the pid is written
  */
 int eradicate(const char *filename)
 {
@@ -39,8 +41,9 @@ int main(int argc, char **argv)
 	return 0;
 }
 
-/*
- * using getopt we dispatch the right code
+/**
+ * Configuration is read from config file and right methods dispatched
+ * based on arguments given to file.
  */
 int dispatch_from_args(int argc, char **argv)
 {
@@ -79,8 +82,10 @@ int dispatch_from_args(int argc, char **argv)
 
 }
 
-/*
- * function which is executed when simply starting aids
+/**
+ * This method fork's child process as daemon to continue the work and exits. Also pid
+ * file with child's pid is created. If pid file already exists, method prints warning
+ * and exits doing nothing.
  */
 void do_run(void)
 {
@@ -142,6 +147,14 @@ void do_run(void)
 	}
 }
 
+/**
+ * Using libconfig a config file is parsed and options are extracted to global
+ * struct aids_conf. If config file is malformed a description of the error
+ * is returned.
+ *
+ * @param filename name of config file
+ * @returns description of error in case of failure or NULL if everything goes ok
+ */
 const char *read_conf(const char *filename)
 {
 	int r;
