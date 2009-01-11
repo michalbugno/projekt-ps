@@ -1,5 +1,6 @@
 #include <unistd.h>
 #include <signal.h>
+#include <libconfig.h>
 #include "network.h"
 #include "main.h"
 #include "system.h"
@@ -42,6 +43,13 @@ int main(int argc, char **argv)
 int dispatch_from_args(int argc, char **argv)
 {
 	int c;
+	const char *error;
+
+	if ((error = read_conf("aids.cfg")) != NULL)
+	{
+		printf("Error reading config file: %s\n", error);
+		return 2;
+	}
 
 	if (argc == 1)
 	{
@@ -56,7 +64,7 @@ int dispatch_from_args(int argc, char **argv)
 			{
 				case 'k':
 					printf("Killing server...\n");
-					eradicate(PID_FILE);
+					eradicate(aids_conf.pid_file);
 					break;
 
 				case '?':
@@ -82,13 +90,13 @@ void do_run(void)
 	/*
 	 * check if PID_FILE exists, if yes, then the server is already running
 	 */
-	f = fopen(PID_FILE, "r");
+	f = fopen(aids_conf.pid_file, "r");
 	if (f != NULL)
 	{
 		/*
 		 * print info and don't do anything
 		 */
-		printf("Pid file exists! Not starting server... (remove pid file %s if the server is not running)\n", PID_FILE);
+		printf("Pid file exists! Not starting server... (remove pid file %s if the server is not running)\n", aids_conf.pid_file);
 		fclose(f);
 		exit(0);
 	} else
@@ -105,7 +113,7 @@ void do_run(void)
 		if (pid > 0)
 		{
 			fclose(f);
-			f = fopen(PID_FILE, "w");
+			f = fopen(aids_conf.pid_file, "w");
 			fprintf(f, "%d\n", pid);
 			fclose(f);
 			exit(0);
@@ -114,14 +122,38 @@ void do_run(void)
 			/*
 			 * child process -- do the stuff
 			 */
-			read_conf(&aids_conf);
 			network_usage("en1", &traffic);
 			load_average(&load_avg);
 		}
 	}
 }
 
-int read_conf(struct aids_global_conf *conf)
+const char *read_conf(const char *filename)
 {
-	return 1;
+	int r;
+	config_t cfg;
+	const char *pid_file;
+	int network_timeout, processor_timeout;
+
+	r = config_read_file(&cfg, filename);
+
+	if (r == CONFIG_TRUE)
+	{
+		pid_file = config_lookup_string(&cfg, "pid_file");
+		if (pid_file == NULL)
+			pid_file = "aids.pid";
+		aids_conf.pid_file = malloc(sizeof(char) * strlen(pid_file));
+		strcpy(aids_conf.pid_file, pid_file);
+
+		network_timeout = config_lookup_int(&cfg, "timeouts:network");
+		if (network_timeout <= 0) network_timeout = 10;
+		aids_conf.network_timeout = network_timeout;
+
+		processor_timeout = config_lookup_int(&cfg, "timeouts:processor");
+		if (processor_timeout <= 0) processor_timeout = 10;
+		aids_conf.processor_timeout = processor_timeout;
+
+		return NULL;
+	} else
+		return config_error_text(&cfg);
 }
