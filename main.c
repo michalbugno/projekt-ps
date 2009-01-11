@@ -114,11 +114,14 @@ void do_run(void)
 			/*
 			 * child process -- do the stuff
 			 */
-			while (1)
-			{
-				network_usage("en1", &traffic);
-				load_average(&load_avg);
-			}
+			read_conf(&aids_conf);
+			network_usage("en1", &traffic);
+			load_average(&load_avg);
 		}
 	}
+}
+
+int read_conf(struct aids_global_conf *conf)
+{
+	return 1;
 }

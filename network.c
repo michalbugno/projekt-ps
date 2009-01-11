@@ -1,4 +1,8 @@
+#include <unistd.h>
 #include "network.h"
+#include "main.h"
+
+extern struct aids_global_conf aids_conf;
 
 void network_usage(const char *dev, struct network_traffic *traffic)
 {
@@ -52,4 +56,15 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header, const u_char *pa
 
 	stats = (struct network_stats *)args;
 	stats -> length += header -> len;
+}
+
+void aids_gather_network(void)
+{
+	struct network_traffic traffic;
+
+	while (1)
+	{
+		network_usage("en1", &traffic);
+		sleep(aids_conf.network_timeout);
+	}
 }

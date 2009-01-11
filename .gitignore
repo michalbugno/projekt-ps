@@ -3,9 +3,11 @@ referat/referat.pdf
 *.o
 aids
 .tmp_versions
-referat/*.aux
-referat/*.log
-referat/*.nav
-referat/*.out
-referat/*.snm
-referat/*.toc
+*.aux
+*.log
+*.nav
+*.out
+*.snm
+*.toc
+*.bak
+*.pid
