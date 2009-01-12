@@ -2,6 +2,7 @@
 #include <pthread.h>
 #include "network.h"
 #include "main.h"
+#include <math.h>
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <netinet/in.h>
@@ -55,7 +56,7 @@ void network_usage(const char *dev, struct network_traffic *traffic)
 		return;
 	}
 
-	printf("NET: %s\n", net);
+	/* printf("NET: %s\n", net); */
 
 	handle = pcap_open_live(dev, 99999, 1, 1000, errbuf);
 	if (handle == NULL)
@@ -108,6 +109,31 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header, const u_char *pa
 	stats -> length += header -> len;
 }
 
+double standard_traffic_deviation(struct network_traffic network_stats[], int count)
+{
+	double average = 0;
+	double single_var;
+	double variance = 0;
+	int i;
+
+	for(i = 0 ; i < count ; i+=1)
+	{
+		average += network_stats[i].in;
+	}
+	average /= count;
+
+	for(i = 0 ; i < count ; i+=1)
+	{
+		single_var = (network_stats[i].in - average);
+		single_var *= single_var;
+		variance += single_var;
+	}
+	variance /= count;
+
+	printf("\nAverage: %lf, Variance: %lf\n", average, variance);
+	return sqrt(variance);
+}
+
 /**
  * Used to gather network data every defined number of seconds.
  *
@@ -155,18 +181,18 @@ void aids_gather_network(void)
 		}
 		status = stat(aids_conf.network_recent_data_filename, &buffer);
 
-		double in_average = 0;
-
 		if(buffer.st_size > 0)
 		{
 			for ( i = 0 ; i < aids_conf.network_recent ; i += 1)
 			{
 				fscanf(data_file, "%lf,%lf\n", &(traffic_all[i].in), &(traffic_all[i].out));
-				/* printf("%lf,%lf\n", traffic.in, traffic.out); */
-				in_average += traffic_all[i].in;
+				/* printf("%lf,%lf\n", traffic.in, traffic.out); 
+				in_average += traffic_all[i].in;*/
 			}
-			in_average /= aids_conf.network_recent;
-			printf("Average: %lf, Tests: %d\n", in_average, aids_conf.network_recent);
+			/* in_average /= aids_conf.network_recent; */
+			double deviation = standard_traffic_deviation(traffic_all, aids_conf.network_recent);
+			printf("Standard deviation: %lf\n", deviation);
+
 		}
 		fclose(data_file);
 	}
