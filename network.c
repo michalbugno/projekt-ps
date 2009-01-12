@@ -125,7 +125,12 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header, const u_char *pa
 	stats -> length += header -> len;
 }
 
-
+/**
+ * A method for counting the standard deviation of the accumulated network traffic data.
+ *
+ * @param network_stats The network statistics to be processed.
+ * @param count The number of measures to be processed.
+ */
 double standard_traffic_deviation(struct network_traffic network_stats[], int count)
 {
 	double average = 0;
