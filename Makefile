@@ -1,4 +1,4 @@
-CFLAGS = -Wall
+CFLAGS = -Wall -I/opt/local/include -L/opt/local/lib
 LDFLAGS = -lpcap -lc -lconfig -lpthread
 
 all: aids doc

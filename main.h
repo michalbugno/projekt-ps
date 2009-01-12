@@ -1,6 +1,13 @@
 #ifndef MAIN_H
 #define MAIN_H
 
+#include <pthread.h>
+
+#define THREAD_NUM 3
+#define THREAD_NETWORK 0
+#define THREAD_LOAD 1
+#define THREAD_ANALYZER 2
+
 /**
  * Structure holding global config.
  *
@@ -42,9 +49,12 @@ struct aids_global_conf
  */
 struct aids_global_conf aids_conf;
 
+pthread_t aids_threads[THREAD_NUM];
+
 int eradicate(const char *);
 int dispatch_from_args(int, char **);
 void do_run(void);
 const char *read_conf(const char *);
+void sigint_handler(int);
 
 #endif

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <pthread.h>
 #include "system.h"
 #include "main.h"
 
@@ -44,11 +45,21 @@ void aids_gather_processor_load(void)
 	while (1)
 	{
 		data_file = fopen("data/current_load.dat", "w");
+		if (data_file == NULL)
+		{
+			perror("[system.c] Couldn't open file data/current_load.dat for writing");
+			pthread_exit(NULL);
+		}
 		fclose(data_file);
 		for(i = 0; i < aids_conf.recent_processor ; i += 1)
 		{
 			load_average(&load);
 			data_file = fopen("data/current_load.dat", "a");
+			if (data_file == NULL)
+			{
+				perror("[system.c] Couldn't open file data/current_load.dat for writing");
+				pthread_exit(NULL);
+			}
 			fprintf(data_file,"%d\n", load.measures);
 			for(j = 0; j < load.measures-1 ; j+=1)
 			{

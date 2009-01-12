@@ -1,4 +1,5 @@
 #include <unistd.h>
+#include <pthread.h>
 #include "network.h"
 #include "main.h"
 
@@ -90,12 +91,22 @@ void aids_gather_network(void)
 	while (1)
 	{
 		data_file = fopen("data/current_traffic.dat", "w");
+		if (data_file == NULL)
+		{
+			perror("[network.c] Couldn't open file data/current_traffic.dat for writing");
+			pthread_exit(NULL);
+		}
 		fclose(data_file);
 		
 		for(i = 0; i < aids_conf.recent_network ; i += 1)
 		{
 			network_usage("en1", &traffic);
 			data_file = fopen("data/current_traffic.dat", "a");
+			if (data_file == NULL)
+			{
+				perror("[network.c] Couldn't open file data/current_traffic.dat for writing");
+				pthread_exit(NULL);
+			}
 			fprintf(data_file, "%lf,%lf\n", traffic.in, traffic.out);
 			fclose(data_file);
 		}

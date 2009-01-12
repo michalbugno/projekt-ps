@@ -40,7 +40,7 @@ int eradicate(const char *filename)
 	}
 
 	fscanf(file, "%d", &pid);
-	if (kill((pid_t)pid, SIGKILL) != 0)
+	if (kill((pid_t)pid, SIGINT) != 0)
 	{
 		printf("Couldn't kill process %d\n", pid);
 		return -1;
@@ -105,9 +105,8 @@ int dispatch_from_args(int argc, char **argv)
 void do_run(void)
 {
 	pid_t pid;
-	pthread_t threads[3];
 	FILE *f;
-	int rc;
+	int rc, i;
 
 	/*
 	 * check if PID_FILE exists, if yes, then the server is already running
@@ -144,27 +143,30 @@ void do_run(void)
 			/*
 			 * child process -- do the stuff
 			 */
-			rc = pthread_create(&threads[0], NULL, (void *)aids_gather_network, NULL);
+
+			signal(SIGINT, sigint_handler);
+
+			rc = pthread_create(&aids_threads[THREAD_NETWORK], NULL, (void *)aids_gather_network, NULL);
 			if (rc != 0)
 			{
 				printf("Couldn't create thread, exiting (%d)\n", rc);
 				exit(-1);
 			}
-			rc = pthread_create(&threads[1], NULL, (void *)aids_gather_processor_load, NULL);
+			rc = pthread_create(&aids_threads[THREAD_LOAD], NULL, (void *)aids_gather_processor_load, NULL);
 			if (rc != 0)
 			{
 				printf("Couldn't create thread, exiting (%d)\n", rc);
 				exit(-1);
 			}
-			rc = pthread_create(&threads[2], NULL, (void *)data_analyzer, NULL);
+			rc = pthread_create(&aids_threads[THREAD_ANALYZER], NULL, (void *)data_analyzer, NULL);
 			if (rc != 0)
 			{
 				printf("Couldn't create thread, exiting (%d)\n", rc);
 				exit(-1);
 			}
-			pthread_join(threads[0], NULL);
-			pthread_join(threads[1], NULL);
-			pthread_join(threads[2], NULL);
+
+			for (i = 0; i < THREAD_NUM; i++)
+				pthread_join(aids_threads[i], NULL);
 		}
 	}
 }
@@ -213,4 +215,21 @@ const char *read_conf(const char *filename)
 		return NULL;
 	} else
 		return config_error_text(&cfg);
+}
+
+/**
+ * Catches SIGINT signal, exits all threads and quits AIDS.
+ *
+ * @param sig signal number
+ */
+void sigint_handler(int sig)
+{
+	int i;
+
+	printf("Exiting...");
+	for (i = 0; i < THREAD_NUM; i++)
+		if (aids_threads[i] != NULL) pthread_kill(aids_threads[i], SIGINT);
+	printf(" bye!\n");
+	signal(SIGINT, SIG_DFL);
+	kill(getpid(), SIGINT);
 }
