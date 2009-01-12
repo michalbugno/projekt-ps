@@ -12,3 +12,4 @@ aids
 *.bak
 *.pid
 doc/
+data/
