@@ -3,9 +3,30 @@
 
 #include <pthread.h>
 
+/**
+ * Total number of threads in application.
+ */
 #define THREAD_NUM 3
+
+/**
+ * Number of network gather thread in global thread array.
+ *
+ * @see aids_threads
+ */
 #define THREAD_NETWORK 0
+
+/**
+ * Number of load gather thread in global thread array.
+ *
+ * @see aids_threads
+ */
 #define THREAD_LOAD 1
+
+/**
+ * Number of analyzer thread in global thread array.
+ *
+ * @see aids_threads
+ */
 #define THREAD_ANALYZER 2
 
 /**
@@ -49,6 +70,9 @@ struct aids_global_conf
  */
 struct aids_global_conf aids_conf;
 
+/**
+ * Global array containing threads ran by AIDS.
+ */
 pthread_t aids_threads[THREAD_NUM];
 
 int eradicate(const char *);

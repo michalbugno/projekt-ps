@@ -78,8 +78,6 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header, const u_char *pa
  * Used to gather network data every defined number of seconds.
  *
  * @see do_run
- *
- * \todo This method should write the data to some file.
  */
 void aids_gather_network(void)
 {
