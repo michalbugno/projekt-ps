@@ -15,6 +15,7 @@ extern struct aids_global_conf aids_conf;
  * @param traffic pointer to an initialized structure to which the data will be saved.
  *
  * \todo Modify network sniffer to gather in and out data separately.
+ * \todo Modify so that it doesn't depend on number of packets received but works for say 1sec
  */
 void network_usage(const char *dev, struct network_traffic *traffic)
 {
@@ -93,49 +94,49 @@ void aids_gather_network(void)
 
 	while (1)
 	{
-		data_file = fopen("data/current_traffic.dat", "w");
+		data_file = fopen(aids_conf.network_recent_data_filename, "w");
 		if (data_file == NULL)
 		{
-			perror("[network.c] Couldn't open file data/current_traffic.dat for writing");
+			perror("[network.c] Couldn't open file for writing");
 			pthread_exit(NULL);
 		}
 		fclose(data_file);
 		
-		for(i = 0; i < aids_conf.recent_network ; i += 1)
+		for(i = 0; i < aids_conf.network_recent ; i += 1)
 		{
 			network_usage("en1", &traffic);
-			data_file = fopen("data/current_traffic.dat", "a");
+			data_file = fopen(aids_conf.network_recent_data_filename, "a");
 			if (data_file == NULL)
 			{
-				perror("[network.c] Couldn't open file data/current_traffic.dat for writing");
+				perror("[network.c] Couldn't open file for writing");
 				pthread_exit(NULL);
 			}
 			fprintf(data_file, "%lf,%lf\n", traffic.in, traffic.out);
 			fclose(data_file);
-			sleep(aids_conf.network_timeout);
+			sleep(aids_conf.network_sleep_time);
 		}
 
-		struct network_traffic traffic_all[aids_conf.recent_network];
+		struct network_traffic traffic_all[aids_conf.network_recent];
 
-		if ((data_file = fopen("data/current_traffic.dat", "r")) == NULL)
+		if ((data_file = fopen(aids_conf.network_recent_data_filename, "r")) == NULL)
 		{
-			perror("Error opening the file");
+			perror("[network.c] Couldn't open file for writing");
 			exit(-1);
 		}
-		status = stat("data/current_traffic.dat", &buffer);
+		status = stat(aids_conf.network_recent_data_filename, &buffer);
 
 		double in_average = 0;
 
-		if(buffer.st_size > 0) 
+		if(buffer.st_size > 0)
 		{
-			for ( i = 0 ; i < aids_conf.recent_network ; i += 1) 
+			for ( i = 0 ; i < aids_conf.network_recent ; i += 1)
 			{
 				fscanf(data_file, "%lf,%lf\n", &(traffic_all[i].in), &(traffic_all[i].out));
 				/* printf("%lf,%lf\n", traffic.in, traffic.out); */
 				in_average += traffic_all[i].in;
 			}
-			in_average /= aids_conf.recent_network;
-			printf("Average: %lf, Tests: %d\n", in_average, aids_conf.recent_network);
+			in_average /= aids_conf.network_recent;
+			printf("Average: %lf, Tests: %d\n", in_average, aids_conf.network_recent);
 		}
 		fclose(data_file);
 	}

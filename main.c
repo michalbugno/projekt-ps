@@ -32,6 +32,7 @@ int eradicate(const char *filename)
 	FILE *file;
 	int pid;
 
+	printf("Killing server...\n");
 	file = fopen(filename, "r");
 	if (file == NULL)
 	{
@@ -73,7 +74,6 @@ int dispatch_from_args(int argc, char **argv)
 
 	if (argc == 1)
 	{
-		printf("Starting aids...\n");
 		do_run();
 		return 1;
 	} else
@@ -83,7 +83,6 @@ int dispatch_from_args(int argc, char **argv)
 			switch (c)
 			{
 				case 'k':
-					printf("Killing server...\n");
 					eradicate(aids_conf.pid_file);
 					break;
 
@@ -107,6 +106,8 @@ void do_run(void)
 	pid_t pid;
 	FILE *f;
 	int rc, i;
+
+	printf("Starting aids...\n");
 
 	/*
 	 * check if PID_FILE exists, if yes, then the server is already running
@@ -183,38 +184,60 @@ const char *read_conf(const char *filename)
 {
 	int r;
 	config_t cfg;
-	const char *pid_file;
-	int network_timeout, processor_timeout, recent_network, recent_processor;
+	int network_sleep_time, processor_sleep_time, network_recent, processor_recent;
 
 	r = config_read_file(&cfg, filename);
 
 	if (r == CONFIG_TRUE)
 	{
-		pid_file = config_lookup_string(&cfg, "pid_file");
-		if (pid_file == NULL)
-			pid_file = "aids.pid";
-		aids_conf.pid_file = malloc(sizeof(char) * strlen(pid_file));
-		strcpy(aids_conf.pid_file, pid_file);
+		aids_conf.pid_file = read_in_string(&cfg, "pid_file", "aids.pid");
+		aids_conf.network_recent_data_filename = read_in_string(&cfg, "network:recent_data_filename", "data/recent_network.dat");
+		aids_conf.network_global_data_filename = read_in_string(&cfg,  "network:global_data_filename", "data/network.dat");
+		aids_conf.processor_recent_data_filename = read_in_string(&cfg, "processor:recent_data_filename", "data/recent_processor.dat");
+		aids_conf.processor_global_data_filename = read_in_string(&cfg, "processor:global_data_filename", "data/processor.dat");
 
-		network_timeout = config_lookup_int(&cfg, "timeouts:network");
-		if (network_timeout <= 0) network_timeout = 10;
-		aids_conf.network_timeout = network_timeout;
+		network_sleep_time = config_lookup_int(&cfg, "network:sleep_time");
+		if (network_sleep_time <= 0) network_sleep_time = 10;
+		aids_conf.network_sleep_time = network_sleep_time;
 
-		processor_timeout = config_lookup_int(&cfg, "timeouts:processor");
-		if (processor_timeout <= 0) processor_timeout = 10;
-		aids_conf.processor_timeout = processor_timeout;
+		processor_sleep_time = config_lookup_int(&cfg, "processor:sleep_time");
+		if (processor_sleep_time <= 0) processor_sleep_time = 10;
+		aids_conf.processor_sleep_time = processor_sleep_time;
 
-		recent_network = config_lookup_int(&cfg, "recent_data:network");
-		if (recent_network <= 0) recent_network = 100;
-		aids_conf.recent_network = recent_network;
+		network_recent = config_lookup_int(&cfg, "network:recent_data");
+		if (network_recent <= 0) network_recent = 100;
+		aids_conf.network_recent = network_recent;
 
-		recent_processor = config_lookup_int(&cfg, "recent_data:processor");
-		if (recent_processor <= 0) recent_processor = 100;
-		aids_conf.recent_processor = recent_processor;
+		processor_recent = config_lookup_int(&cfg, "processor:recent_data");
+		if (processor_recent <= 0) processor_recent = 100;
+		aids_conf.processor_recent = processor_recent;
 
 		return NULL;
 	} else
 		return config_error_text(&cfg);
+}
+
+/**
+ * Reads config value from cfg present at path and returns it. If no path found
+ * default_value is used.
+ *
+ * @param cfg config file structure
+ * @param path key to look for
+ * @param default_value string returned if no value found
+ * @returns value of key or default_value if no path found
+ */
+char *read_in_string(config_t *cfg, char *path, char *default_value)
+{
+
+	const char *value;
+	char *dest;
+	
+	value = config_lookup_string(cfg, path);
+	if (value == NULL)
+		value = default_value;
+	dest = malloc(sizeof(char) * strlen(value));
+	strcpy(dest, value);
+	return dest;
 }
 
 /**
@@ -226,10 +249,8 @@ void sigint_handler(int sig)
 {
 	int i;
 
-	printf("Exiting...");
 	for (i = 0; i < THREAD_NUM; i++)
 		if (aids_threads[i] != NULL) pthread_kill(aids_threads[i], SIGINT);
-	printf(" bye!\n");
 	signal(SIGINT, SIG_DFL);
 	kill(getpid(), SIGINT);
 }

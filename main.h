@@ -2,6 +2,7 @@
 #define MAIN_H
 
 #include <pthread.h>
+#include <libconfig.h>
 
 /**
  * Total number of threads in application.
@@ -39,22 +40,42 @@ struct aids_global_conf
 	/**
 	 * Number of seconds every each the network data will be gathered
 	 */
-	int network_timeout;
-
-	/**
-	 * Number of seconds every each the processor load data will be gathered
-	 */
-	int processor_timeout;
+	int network_sleep_time;
 
 	/**
 	 * Number of network data nodes kept as 'recent'
 	 */
-	int recent_network;
+	int network_recent;
+
+	/**
+	 * Filename where recent network data is kept.
+	 */
+	char *network_recent_data_filename;
+
+	/**
+	 * Filename where global network data is kept.
+	 */
+	char *network_global_data_filename;
 	
+	/**
+	 * Number of seconds every each the processor load data will be gathered
+	 */
+	int processor_sleep_time;
+
 	/**
 	 * Number of processor load data nodes kept as 'recent'
 	 */
-	int recent_processor;
+	int processor_recent;
+
+	/**
+	 * Filename where recent processor load data is kept.
+	 */
+	char *processor_recent_data_filename;
+
+	/**
+	 * Filename where global processor load data is kept.
+	 */
+	char *processor_global_data_filename;
 
 	/**
 	 * Name of the file containing pid of spawned process.
@@ -80,5 +101,6 @@ int dispatch_from_args(int, char **);
 void do_run(void);
 const char *read_conf(const char *);
 void sigint_handler(int);
+char *read_in_string(config_t *, char *, char *);
 
 #endif

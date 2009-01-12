@@ -42,20 +42,20 @@ void aids_gather_processor_load(void)
 
 	while (1)
 	{
-		data_file = fopen("data/current_load.dat", "w");
+		data_file = fopen(aids_conf.processor_recent_data_filename, "w");
 		if (data_file == NULL)
 		{
-			perror("[system.c] Couldn't open file data/current_load.dat for writing");
+			perror("[system.c] Couldn't open file for writing");
 			pthread_exit(NULL);
 		}
 		fclose(data_file);
-		for(i = 0; i < aids_conf.recent_processor ; i += 1)
+		for(i = 0; i < aids_conf.processor_recent; i += 1)
 		{
 			load_average(&load);
-			data_file = fopen("data/current_load.dat", "a");
+			data_file = fopen(aids_conf.processor_recent_data_filename, "a");
 			if (data_file == NULL)
 			{
-				perror("[system.c] Couldn't open file data/current_load.dat for writing");
+				perror("[system.c] Couldn't open file for writing");
 				pthread_exit(NULL);
 			}
 			fprintf(data_file,"%d\n", load.measures);
@@ -65,7 +65,7 @@ void aids_gather_processor_load(void)
 			}
 			fprintf(data_file, "%lf\n", load.data[load.measures-1]);
 			fclose(data_file);
-			sleep(aids_conf.processor_timeout);
+			sleep(aids_conf.processor_sleep_time);
 		}
 		
 	}
