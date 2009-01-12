@@ -49,12 +49,12 @@ void aids_gather_processor_load(void)
 		{
 			load_average(&load);
 			data_file = fopen("data/current_load.dat", "a");
-			fprintf(data_file,"%d,", load.measures);
+			fprintf(data_file,"%d\n", load.measures);
 			for(j = 0; j < load.measures-1 ; j+=1)
 			{
-				fprintf(data_file,"%g,", load.data[j]);
+				fprintf(data_file,"%lf,", load.data[j]);
 			}
-			fprintf(data_file, "%g\n", load.data[load.measures-1]);
+			fprintf(data_file, "%lf\n", load.data[load.measures-1]);
 			fclose(data_file);
 			sleep(aids_conf.processor_timeout);
 		}

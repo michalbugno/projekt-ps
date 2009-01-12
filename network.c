@@ -96,7 +96,7 @@ void aids_gather_network(void)
 		{
 			network_usage("en1", &traffic);
 			data_file = fopen("data/current_traffic.dat", "a");
-			fprintf(data_file, "%g,%g\n", traffic.in, traffic.out);
+			fprintf(data_file, "%lf,%lf\n", traffic.in, traffic.out);
 			fclose(data_file);
 		}
 
