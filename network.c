@@ -1,9 +1,9 @@
 #include <unistd.h>
-#include <stdlib.h>
-#include <sys/stat.h>
 #include "network.h"
 #include "main.h"
-#include "system.h"
+#include <stdlib.h>
+#include <sys/stat.h>
+
 
 extern struct aids_global_conf aids_conf;
 
@@ -88,6 +88,8 @@ void aids_gather_network(void)
 	struct network_traffic traffic;
 	int i;
 	FILE* data_file;
+	struct stat buffer;
+	int status;
 
 
 	while (1)
@@ -105,15 +107,12 @@ void aids_gather_network(void)
 		}
 
 		struct network_traffic traffic_all[aids_conf.recent_network];
-		struct stat buffer;
 
 		if ((data_file = fopen("data/current_traffic.dat", "r")) == NULL)
 		{
 			perror("Error opening the file");
 			exit(-1);
 		}
-
-		int status;
 		status = stat("data/current_traffic.dat", &buffer);
 
 		double in_average = 0;
@@ -127,7 +126,7 @@ void aids_gather_network(void)
 				in_average += traffic_all[i].in;
 			}
 			in_average /= aids_conf.recent_network;
-			printf("Average: %lf\n", in_average);
+			printf("Average: %lf, Tests: %d\n", in_average, aids_conf.recent_network);
 		}
 		fclose(data_file);
 	}
