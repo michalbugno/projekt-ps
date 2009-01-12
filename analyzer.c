@@ -7,11 +7,11 @@
 #include "network.h"
 
 /**
- * Method to analyze data gathered from the previously saved files
+ * Method to analyze data gathered from the previously saved files data/current_*.dat.
  *
  * \todo Add some analysis.
  */
-void data_analyzer(void) 
+void data_analyzer(void)
 {
 	struct load_average load;
 	struct network_traffic traffic;
@@ -19,18 +19,18 @@ void data_analyzer(void)
 	int status;
 	FILE* data_file;
 
-	while(1) 
+	while(1)
 	{
 		sleep(5);
 		if ((data_file = fopen("data/current_traffic.dat", "r")) == NULL )
 		{
-			perror("file opening problem");
+			perror("[analyzer] Couldn't open file current_traffic.dat for reading");
 			exit(-1);
 		}
 		
 		status = stat("data/current_traffic.dat", &buffer);
 		/* printf("%d\n", (int)buffer.st_size); */
-		if( buffer.st_size > 0 ) 
+		if( buffer.st_size > 0 )
 		{
 			fscanf(data_file, "%lf,%lf\n", &(traffic.in), &(traffic.out));
 			/* printf("%lf,%lf\n", traffic.in, traffic.out); */
@@ -39,7 +39,7 @@ void data_analyzer(void)
 
 		if ((data_file = fopen("data/current_load.dat", "r")) == NULL )
 		{
-			perror("file opening problem");
+			perror("[analyzer] Couldn't open file current_load.dat for reading");
 			exit(-1);
 		}
 		
