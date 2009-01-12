@@ -21,14 +21,13 @@ void data_analyzer(void)
 
 	while(1)
 	{
-		sleep(5);
-		if ((data_file = fopen("data/current_traffic.dat", "r")) == NULL )
+		if ((data_file = fopen(aids_conf.network_recent_data_filename, "r")) == NULL )
 		{
-			perror("[analyzer] Couldn't open file current_traffic.dat for reading");
+			perror("[analyzer.c] Couldn't open file for reading");
 			exit(-1);
 		}
 		
-		status = stat("data/current_traffic.dat", &buffer);
+		status = stat(aids_conf.network_recent_data_filename, &buffer);
 		/* printf("%d\n", (int)buffer.st_size); */
 		if( buffer.st_size > 0 )
 		{
@@ -37,13 +36,13 @@ void data_analyzer(void)
 		}
 		fclose(data_file);
 
-		if ((data_file = fopen("data/current_load.dat", "r")) == NULL )
+		if ((data_file = fopen(aids_conf.processor_recent_data_filename, "r")) == NULL )
 		{
-			perror("[analyzer] Couldn't open file current_load.dat for reading");
+			perror("[analyzer.c] Couldn't open file for reading");
 			exit(-1);
 		}
 		
-		status = stat("data/current_load.dat", &buffer);
+		status = stat(aids_conf.processor_recent_data_filename, &buffer);
 		/* printf("%d\n", (int)buffer.st_size); */
 		if( buffer.st_size > 0 )
 		{

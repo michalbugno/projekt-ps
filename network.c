@@ -1,11 +1,11 @@
 #include <unistd.h>
 #include <pthread.h>
-#include "network.h"
-#include "main.h"
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include "network.h"
+#include "main.h"
 
 
 extern struct aids_global_conf aids_conf;
@@ -29,15 +29,11 @@ void network_usage(const char *dev, struct network_traffic *traffic)
 	char errbuf[PCAP_ERRBUF_SIZE];
 	bpf_u_int32 netp;
 	bpf_u_int32 maskp;
-
 	struct in_addr addr;
-
 	int ret;
-
 	double seconds;
 
 	seconds = 0.0;
-
 	ret = pcap_lookupnet(dev, &netp, &maskp, errbuf);
 
 	if(ret == -1) 
