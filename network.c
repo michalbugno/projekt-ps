@@ -4,6 +4,8 @@
 #include "main.h"
 #include <stdlib.h>
 #include <sys/stat.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 
 
 extern struct aids_global_conf aids_conf;
@@ -16,16 +18,44 @@ extern struct aids_global_conf aids_conf;
  *
  * \todo Modify network sniffer to gather in and out data separately.
  * \todo Modify so that it doesn't depend on number of packets received but works for say 1sec
+ * \todo Add IP address recognition.
  */
 void network_usage(const char *dev, struct network_traffic *traffic)
 {
 	pcap_t *handle;
 	struct network_stats stats;
 	struct pcap_pkthdr header_start, header_finish;
+	char *net; /* the network address */
+	char errbuf[PCAP_ERRBUF_SIZE];
+	bpf_u_int32 netp;
+	bpf_u_int32 maskp;
+
+	struct in_addr addr;
+
+	int ret;
+
 	double seconds;
 
-
 	seconds = 0.0;
+
+	ret = pcap_lookupnet(dev, &netp, &maskp, errbuf);
+
+	if(ret == -1) 
+	{
+		fprintf(stderr, "%s\n", errbuf);
+		return;
+	}
+
+	addr.s_addr = netp;
+	net = inet_ntoa(addr);
+
+	if(net == NULL)
+	{
+		fprintf(stderr, "inet_itoa");
+		return;
+	}
+
+	printf("NET: %s\n", net);
 
 	handle = pcap_open_live(dev, 99999, 1, 1000, errbuf);
 	if (handle == NULL)
