@@ -1,5 +1,6 @@
 #include <unistd.h>
 #include <pthread.h>
+#include <math.h>
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <netinet/in.h>
@@ -7,20 +8,19 @@
 #include "network.h"
 #include "main.h"
 
-
 extern struct aids_global_conf aids_conf;
-
 /**
  * Method to gather network data to a structure.
  *
  * @param dev string name of network device which shall be sniffed.
  * @param traffic pointer to an initialized structure to which the data will be saved.
+ * @param filter filter description
  *
  * \todo Modify network sniffer to gather in and out data separately.
  * \todo Modify so that it doesn't depend on number of packets received but works for say 1sec
  * \todo Add IP address recognition.
  */
-void network_usage(const char *dev, struct network_traffic *traffic)
+void network_usage(const char *dev, struct network_traffic *traffic, const char *filter)
 {
 	pcap_t *handle;
 	struct network_stats stats;
@@ -29,6 +29,7 @@ void network_usage(const char *dev, struct network_traffic *traffic)
 	char errbuf[PCAP_ERRBUF_SIZE];
 	bpf_u_int32 netp;
 	bpf_u_int32 maskp;
+	struct bpf_program fp;
 	struct in_addr addr;
 	int ret;
 	double seconds;
@@ -36,7 +37,7 @@ void network_usage(const char *dev, struct network_traffic *traffic)
 	seconds = 0.0;
 	ret = pcap_lookupnet(dev, &netp, &maskp, errbuf);
 
-	if(ret == -1) 
+	if(ret == -1)
 	{
 		fprintf(stderr, "%s\n", errbuf);
 		return;
@@ -51,7 +52,7 @@ void network_usage(const char *dev, struct network_traffic *traffic)
 		return;
 	}
 
-	printf("NET: %s\n", net);
+	/* printf("NET: %s\n", net); */
 
 	handle = pcap_open_live(dev, 99999, 1, 1000, errbuf);
 	if (handle == NULL)
@@ -61,6 +62,21 @@ void network_usage(const char *dev, struct network_traffic *traffic)
 	}
 
 	memset(&stats, 0, sizeof(struct network_stats));
+	
+	/*
+	 * Setting the filter
+	 */
+	if(pcap_compile(handle, &fp, filter, 0, netp) == -1)
+	{
+		fprintf(stderr, "[network.c] Error compiling the filter");
+		exit(-1);
+	}
+
+	if(pcap_setfilter(handle, &fp) == -1)
+	{
+		fprintf(stderr, "[network.c] Error setting the filter");
+		exit(-1);
+	}
 
 	/*
 	 * time and size of first received packet
@@ -105,6 +121,37 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header, const u_char *pa
 }
 
 /**
+ * A method for counting the standard deviation of the accumulated network traffic data.
+ *
+ * @param network_stats The network statistics to be processed.
+ * @param count The number of measures to be processed.
+ */
+double standard_traffic_deviation(struct network_traffic network_stats[], int count)
+{
+	double average = 0;
+	double single_var;
+	double variance = 0;
+	int i;
+
+	for(i = 0 ; i < count ; i+=1)
+	{
+		average += network_stats[i].in;
+	}
+	average /= count;
+
+	for(i = 0 ; i < count ; i+=1)
+	{
+		single_var = (network_stats[i].in - average);
+		single_var *= single_var;
+		variance += single_var;
+	}
+	variance /= count;
+
+	printf("\nAverage: %lf, Variance: %lf\n", average, variance);
+	return sqrt(variance);
+}
+
+/**
  * Used to gather network data every defined number of seconds.
  *
  * @see do_run
@@ -116,6 +163,7 @@ void aids_gather_network(void)
 	FILE* data_file;
 	struct stat buffer;
 	int status;
+	struct network_traffic traffic_all[aids_conf.network_recent];
 
 
 	while (1)
@@ -130,7 +178,7 @@ void aids_gather_network(void)
 		
 		for(i = 0; i < aids_conf.network_recent ; i += 1)
 		{
-			network_usage("en1", &traffic);
+			network_usage("en1", &traffic, "src 10.20.110.40");
 			data_file = fopen(aids_conf.network_recent_data_filename, "a");
 			if (data_file == NULL)
 			{
@@ -142,7 +190,6 @@ void aids_gather_network(void)
 			sleep(aids_conf.network_sleep_time);
 		}
 
-		struct network_traffic traffic_all[aids_conf.network_recent];
 
 		if ((data_file = fopen(aids_conf.network_recent_data_filename, "r")) == NULL)
 		{
@@ -151,18 +198,18 @@ void aids_gather_network(void)
 		}
 		status = stat(aids_conf.network_recent_data_filename, &buffer);
 
-		double in_average = 0;
-
 		if(buffer.st_size > 0)
 		{
 			for ( i = 0 ; i < aids_conf.network_recent ; i += 1)
 			{
 				fscanf(data_file, "%lf,%lf\n", &(traffic_all[i].in), &(traffic_all[i].out));
-				/* printf("%lf,%lf\n", traffic.in, traffic.out); */
-				in_average += traffic_all[i].in;
+				/* printf("%lf,%lf\n", traffic.in, traffic.out); 
+				in_average += traffic_all[i].in;*/
 			}
-			in_average /= aids_conf.network_recent;
-			printf("Average: %lf, Tests: %d\n", in_average, aids_conf.network_recent);
+			/* in_average /= aids_conf.network_recent; */
+			double deviation = standard_traffic_deviation(traffic_all, aids_conf.network_recent);
+			printf("Standard deviation: %lf\n", deviation);
+
 		}
 		fclose(data_file);
 	}
