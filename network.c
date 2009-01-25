@@ -104,32 +104,28 @@ void network_usage(const char *dev, struct network_traffic *traffic, const char 
  * A method for counting the standard deviation of the accumulated network traffic data.
  *
  * @param network_stats The network statistics to be processed.
+ * @param avg Initialized structure for math stats
  */
-double *calculate_math(struct network_traffic network_stats[])
+void generate_traffic_stats(struct network_traffic network_stats[], struct average_stats *avg)
 {
 	double single_var;
-	double *ret;
 	int i;
 
-	ret = malloc(sizeof(double) * 2);
-	ret[0] = ret[1] = 0.0;
-
-	for(i = 0 ; i < aids_conf.network_recent; i+=1)
+	for(i = 0; i < aids_conf.network_recent; i++)
 	{
-		ret[0] += network_stats[i].in;
+		avg -> average += network_stats[i].in;
 	}
-	ret[0] /= aids_conf.network_recent;
+	avg -> average /= aids_conf.network_recent;
 
-	for(i = 0 ; i < aids_conf.network_recent ; i+=1)
+	for(i = 0; i < aids_conf.network_recent; i++)
 	{
-		single_var = (network_stats[i].in - ret[0]);
+		single_var = (network_stats[i].in - avg -> average);
 		single_var *= single_var;
-		ret[1] += single_var;
+		avg -> variance += single_var;
 	}
-	ret[1] /= aids_conf.network_recent;
-	ret[1] = sqrt(ret[1]);
+	avg -> variance /= aids_conf.network_recent;
 
-	return ret;
+	avg -> deviation = sqrt(avg -> variance);
 }
 
 /**
@@ -141,8 +137,8 @@ void aids_gather_network(void)
 {
 	struct network_traffic traffic;
 	struct network_traffic recent_traffic[aids_conf.network_recent];
+	struct average_stats avg;
 	int i;
-	double *math;
 	FILE *f;
 
 	while (1)
@@ -159,10 +155,9 @@ void aids_gather_network(void)
 			memcpy(&recent_traffic[i], &traffic, sizeof(struct network_traffic));
 			sleep(aids_conf.network_sleep_time);
 		}
-		math = calculate_math(recent_traffic);
-
-		fprintf(f, "avg: %.3g stdev: %.3g\n", math[0], math[1]);
-		fprintf(stdout, "avg: %.3g stdev: %.3g\n", math[0], math[1]);
+		generate_traffic_stats(recent_traffic, &avg);
+		fprintf(f, "a: %.3g, v: %.3g, d: %.3g\n", avg.average, avg.variance, avg.deviation);
+		fprintf(stdout, "a: %.3g, v: %.3g, d: %.3g\n", avg.average, avg.variance, avg.deviation);
 		fclose(f);
 	}
 }

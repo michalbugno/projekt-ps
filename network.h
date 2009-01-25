@@ -41,7 +41,26 @@ struct network_traffic
 	double out;
 };
 
+/**
+ * Structure for containing the average statistics
+ */
+struct average_stats
+{
+	/**
+	 * Average network bandwith usage
+	 */
+	double average;
+	
+	/**
+	 * The variance attained
+	 */
+	double variance;
 
+	/**
+	 * The standard deviation, being the root square of the variance
+	 */
+	double deviation;
+};
 
 char errbuf[PCAP_ERRBUF_SIZE];
 
