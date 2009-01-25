@@ -59,10 +59,10 @@ struct average_stats
 	/**
 	 * The standard deviation, being the root square of the variance
 	 */
-	double deviation
-}
+	double deviation;
+};
 
-struct average_stats network_stats;
+struct average_stats network_averages;
 
 char errbuf[PCAP_ERRBUF_SIZE];
 

@@ -127,25 +127,24 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header, const u_char *pa
  */
 void generate_traffic_stats(struct network_traffic network_stats[])
 {
-	double average = 0;
 	double single_var;
 	int i;
 
 	for(i = 0 ; i < aids_conf.network_recent; i+=1)
 	{
-		network_stats.average += network_stats[i].in;
+		network_averages.average += network_stats[i].in;
 	}
-	network_stats.average /= aids_conf.network_recent;
+	network_averages.average /= aids_conf.network_recent;
 
 	for(i = 0 ; i < aids_conf.network_recent ; i+=1)
 	{
-		single_var = (network_stats[i].in - network_stats.average);
+		single_var = (network_stats[i].in - network_averages.average);
 		single_var *= single_var;
-		network_stats.variance += single_var;
+		network_averages.variance += single_var;
 	}
-	network_stats.variance /= aids_conf.network_recent;
+	network_averages.variance /= aids_conf.network_recent;
 
-	network_stats.deviation = sqrt(variance);
+	network_averages.deviation = sqrt(network_averages.variance);
 }
 
 /**
@@ -158,7 +157,6 @@ void aids_gather_network(void)
 	struct network_traffic traffic;
 	struct network_traffic recent_traffic[aids_conf.network_recent];
 	int i;
-	double stdev;
 	FILE *f;
 
 	while (1)
@@ -171,13 +169,13 @@ void aids_gather_network(void)
 		}
 		for(i = 0; i < aids_conf.network_recent; i++)
 		{
-			network_usage("en1", &traffic, "src 192.168.1.26");
+			network_usage("en1", &traffic, "src 192.168.0.100");
 			memcpy(&recent_traffic[i], &traffic, sizeof(struct network_traffic));
 			sleep(aids_conf.network_sleep_time);
 		}
 		generate_traffic_stats(recent_traffic);
-		fprintf(f, "%.3g\n", stdev);
-		fprintf(stdout, "%.3g\n", stdev);
+		fprintf(f, "a: %.3g, v: %.3g, d: %.3g\n", network_averages.average, network_averages.variance, network_averages.deviation);
+		fprintf(stdout, "a: %.3g, v: %.3g, d: %.3g\n", network_averages.average, network_averages.variance, network_averages.deviation);
 		fclose(f);
 	}
 }
