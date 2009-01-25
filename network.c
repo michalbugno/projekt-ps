@@ -124,30 +124,28 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header, const u_char *pa
  * A method for counting the standard deviation of the accumulated network traffic data.
  *
  * @param network_stats The network statistics to be processed.
- * @param count The number of measures to be processed.
  */
-double standard_traffic_deviation(struct network_traffic network_stats[], int count)
+double standard_traffic_deviation(struct network_traffic network_stats[])
 {
 	double average = 0;
 	double single_var;
 	double variance = 0;
 	int i;
 
-	for(i = 0 ; i < count ; i+=1)
+	for(i = 0 ; i < aids_conf.network_recent; i+=1)
 	{
 		average += network_stats[i].in;
 	}
-	average /= count;
+	average /= aids_conf.network_recent;
 
-	for(i = 0 ; i < count ; i+=1)
+	for(i = 0 ; i < aids_conf.network_recent ; i+=1)
 	{
 		single_var = (network_stats[i].in - average);
 		single_var *= single_var;
 		variance += single_var;
 	}
-	variance /= count;
+	variance /= aids_conf.network_recent;
 
-	printf("\nAverage: %lf, Variance: %lf\n", average, variance);
 	return sqrt(variance);
 }
 
@@ -159,58 +157,28 @@ double standard_traffic_deviation(struct network_traffic network_stats[], int co
 void aids_gather_network(void)
 {
 	struct network_traffic traffic;
+	struct network_traffic recent_traffic[aids_conf.network_recent];
 	int i;
-	FILE* data_file;
-	struct stat buffer;
-	int status;
-	struct network_traffic traffic_all[aids_conf.network_recent];
-
+	double stdev;
+	FILE *f;
 
 	while (1)
 	{
-		data_file = fopen(aids_conf.network_recent_data_filename, "w");
-		if (data_file == NULL)
+		f = fopen(aids_conf.network_global_data_filename, "a");
+		if (f == NULL)
 		{
-			perror("[network.c] Couldn't open file for writing");
-			pthread_exit(NULL);
+			perror("[network.c] couldn't open file");
+			exit(1);
 		}
-		fclose(data_file);
-		
-		for(i = 0; i < aids_conf.network_recent ; i += 1)
+		for(i = 0; i < aids_conf.network_recent; i++)
 		{
-			network_usage("en1", &traffic, "src 10.20.110.40");
-			data_file = fopen(aids_conf.network_recent_data_filename, "a");
-			if (data_file == NULL)
-			{
-				perror("[network.c] Couldn't open file for writing");
-				pthread_exit(NULL);
-			}
-			fprintf(data_file, "%lf,%lf\n", traffic.in, traffic.out);
-			fclose(data_file);
+			network_usage("en1", &traffic, "src 192.168.1.26");
+			memcpy(&recent_traffic[i], &traffic, sizeof(struct network_traffic));
 			sleep(aids_conf.network_sleep_time);
 		}
-
-
-		if ((data_file = fopen(aids_conf.network_recent_data_filename, "r")) == NULL)
-		{
-			perror("[network.c] Couldn't open file for writing");
-			exit(-1);
-		}
-		status = stat(aids_conf.network_recent_data_filename, &buffer);
-
-		if(buffer.st_size > 0)
-		{
-			for ( i = 0 ; i < aids_conf.network_recent ; i += 1)
-			{
-				fscanf(data_file, "%lf,%lf\n", &(traffic_all[i].in), &(traffic_all[i].out));
-				/* printf("%lf,%lf\n", traffic.in, traffic.out); 
-				in_average += traffic_all[i].in;*/
-			}
-			/* in_average /= aids_conf.network_recent; */
-			double deviation = standard_traffic_deviation(traffic_all, aids_conf.network_recent);
-			printf("Standard deviation: %lf\n", deviation);
-
-		}
-		fclose(data_file);
+		stdev = standard_traffic_deviation(recent_traffic);
+		fprintf(f, "%.3g\n", stdev);
+		fprintf(stdout, "%.3g\n", stdev);
+		fclose(f);
 	}
 }

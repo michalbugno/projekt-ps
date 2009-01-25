@@ -7,7 +7,7 @@
 /**
  * Total number of threads in application.
  */
-#define THREAD_NUM 3
+#define THREAD_NUM 2
 
 /**
  * Number of network gather thread in global thread array.
@@ -22,13 +22,6 @@
  * @see aids_threads
  */
 #define THREAD_LOAD 1
-
-/**
- * Number of analyzer thread in global thread array.
- *
- * @see aids_threads
- */
-#define THREAD_ANALYZER 2
 
 /**
  * Structure holding global config.

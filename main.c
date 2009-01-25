@@ -6,7 +6,6 @@
 #include "network.h"
 #include "main.h"
 #include "system.h"
-#include "analyzer.h"
 
 /** \mainpage AIDS - Anomaly IDS
  *
@@ -154,12 +153,6 @@ void do_run(void)
 				exit(-1);
 			}
 			rc = pthread_create(&aids_threads[THREAD_LOAD], NULL, (void *)aids_gather_processor_load, NULL);
-			if (rc != 0)
-			{
-				printf("Couldn't create thread, exiting (%d)\n", rc);
-				exit(-1);
-			}
-			rc = pthread_create(&aids_threads[THREAD_ANALYZER], NULL, (void *)data_analyzer, NULL);
 			if (rc != 0)
 			{
 				printf("Couldn't create thread, exiting (%d)\n", rc);

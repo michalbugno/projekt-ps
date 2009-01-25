@@ -41,6 +41,8 @@ struct network_traffic
 	double out;
 };
 
+
+
 char errbuf[PCAP_ERRBUF_SIZE];
 
 void network_usage(const char *, struct network_traffic *, const char *);

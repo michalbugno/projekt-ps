@@ -3,7 +3,7 @@ LDFLAGS = -lpcap -lc -lconfig -lpthread
 
 all: aids doc
 
-aids: main.c network.o system.o analyzer.o
+aids: main.c network.o system.o
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
 
 network.o: network.c network.h
@@ -12,10 +12,7 @@ network.o: network.c network.h
 system.o: system.c system.h
 	$(CC) $(CFLAGS) -c -o $@ $*.c
 
-analyzer.o: analyzer.c analyzer.h
-	$(CC) $(CFLAGS) -c -o $@ $*.c
-
-doc: network.c network.h system.c system.h main.c main.h analyzer.c analyzer.h
+doc: network.c network.h system.c system.h main.c main.h
 	doxygen doxygen.conf
 
 clean:
