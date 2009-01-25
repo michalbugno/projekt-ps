@@ -125,28 +125,27 @@ void got_packet(u_char *args, const struct pcap_pkthdr *header, const u_char *pa
  *
  * @param network_stats The network statistics to be processed.
  */
-double standard_traffic_deviation(struct network_traffic network_stats[])
+void generate_traffic_stats(struct network_traffic network_stats[])
 {
 	double average = 0;
 	double single_var;
-	double variance = 0;
 	int i;
 
 	for(i = 0 ; i < aids_conf.network_recent; i+=1)
 	{
-		average += network_stats[i].in;
+		network_stats.average += network_stats[i].in;
 	}
-	average /= aids_conf.network_recent;
+	network_stats.average /= aids_conf.network_recent;
 
 	for(i = 0 ; i < aids_conf.network_recent ; i+=1)
 	{
-		single_var = (network_stats[i].in - average);
+		single_var = (network_stats[i].in - network_stats.average);
 		single_var *= single_var;
-		variance += single_var;
+		network_stats.variance += single_var;
 	}
-	variance /= aids_conf.network_recent;
+	network_stats.variance /= aids_conf.network_recent;
 
-	return sqrt(variance);
+	network_stats.deviation = sqrt(variance);
 }
 
 /**
@@ -176,7 +175,7 @@ void aids_gather_network(void)
 			memcpy(&recent_traffic[i], &traffic, sizeof(struct network_traffic));
 			sleep(aids_conf.network_sleep_time);
 		}
-		stdev = standard_traffic_deviation(recent_traffic);
+		generate_traffic_stats(recent_traffic);
 		fprintf(f, "%.3g\n", stdev);
 		fprintf(stdout, "%.3g\n", stdev);
 		fclose(f);
