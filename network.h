@@ -48,5 +48,6 @@ char errbuf[PCAP_ERRBUF_SIZE];
 void network_usage(const char *, struct network_traffic *, const char *);
 void got_packet(u_char *, const struct pcap_pkthdr *, const u_char *);
 void aids_gather_network(void);
+double *calculate_math(struct network_traffic *);
 
 #endif
