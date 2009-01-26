@@ -4,6 +4,7 @@
 #include <pthread.h>
 #include <stdlib.h>
 #include "network.h"
+#include "connection.h"
 #include "main.h"
 #include "system.h"
 
@@ -31,18 +32,18 @@ int eradicate(const char *filename)
 	FILE *file;
 	int pid;
 
-	printf("Killing server...\n");
+	logger(stderr, INFO, "Killing server");
 	file = fopen(filename, "r");
 	if (file == NULL)
 	{
-		perror("Couldn't open file");
+		logger(stderr, ERROR, "Couldn't open file %s for reading", filename);
 		return -1;
 	}
 
 	fscanf(file, "%d", &pid);
 	if (kill((pid_t)pid, SIGINT) != 0)
 	{
-		printf("Couldn't kill process %d\n", pid);
+		logger(stderr, ERROR, "Couldn't kill process %d\n", pid);
 		return -1;
 	}
 	fclose(file);
@@ -67,7 +68,7 @@ int dispatch_from_args(int argc, char **argv)
 
 	if ((error = read_conf("aids.cfg")) != NULL)
 	{
-		printf("Error reading config file: %s\n", error);
+		logger(stderr, ERROR, "Error reading config file: %s", error);
 		return 2;
 	}
 
@@ -106,7 +107,7 @@ void do_run(void)
 	FILE *f;
 	int rc, i;
 
-	printf("Starting aids...\n");
+	logger(stderr, INFO, "Starting aids");
 
 	/*
 	 * check if PID_FILE exists, if yes, then the server is already running
@@ -117,7 +118,7 @@ void do_run(void)
 		/*
 		 * print info and don't do anything
 		 */
-		printf("Pid file exists! Not starting server... (remove pid file %s if the server is not running)\n", aids_conf.pid_file);
+		logger(stderr, ERROR, "Pid file exists! Not starting server. (remove pid file %s if the server is not running)", aids_conf.pid_file);
 		fclose(f);
 		exit(0);
 	} else
@@ -149,13 +150,13 @@ void do_run(void)
 			rc = pthread_create(&aids_threads[THREAD_NETWORK], NULL, (void *)aids_gather_network, NULL);
 			if (rc != 0)
 			{
-				printf("Couldn't create thread, exiting (%d)\n", rc);
+				logger(stderr, ERROR, "Couldn't create thread, exiting (%d)", rc);
 				exit(-1);
 			}
 			rc = pthread_create(&aids_threads[THREAD_LOAD], NULL, (void *)aids_gather_processor_load, NULL);
 			if (rc != 0)
 			{
-				printf("Couldn't create thread, exiting (%d)\n", rc);
+				logger(stderr, ERROR, "Couldn't create thread, exiting (%d)", rc);
 				exit(-1);
 			}
 
@@ -184,10 +185,11 @@ const char *read_conf(const char *filename)
 	if (r == CONFIG_TRUE)
 	{
 		aids_conf.pid_file = read_in_string(&cfg, "pid_file", "aids.pid");
-		aids_conf.network_recent_data_filename = read_in_string(&cfg, "network:recent_data_filename", "data/recent_network.dat");
 		aids_conf.network_global_data_filename = read_in_string(&cfg,  "network:global_data_filename", "data/network.dat");
-		aids_conf.processor_recent_data_filename = read_in_string(&cfg, "processor:recent_data_filename", "data/recent_processor.dat");
 		aids_conf.processor_global_data_filename = read_in_string(&cfg, "processor:global_data_filename", "data/processor.dat");
+		aids_conf.jabber_id = read_in_string(&cfg, "jabber_id", "anomalyids@gmail.com");
+		aids_conf.jabber_pass = read_in_string(&cfg, "jabber_pass", "systemowe");
+		aids_conf.jabber_receiver_id = read_in_string(&cfg, "jabber_receiver_id", "michal.bugno@gmail.com");
 
 		network_sleep_time = config_lookup_int(&cfg, "network:sleep_time");
 		if (network_sleep_time <= 0) network_sleep_time = 10;
