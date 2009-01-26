@@ -101,10 +101,10 @@ void network_usage(const char *dev, struct network_traffic *traffic, const char 
 }
 
 /**
- * A method for counting the standard deviation of the accumulated network traffic data.
+ * A method for computing the statistical data of the accumulated network traffic data.
  *
  * @param network_stats The network statistics to be processed.
- * @param avg Initialized structure for math stats
+ * @param avg Initialized structure for math stats.
  */
 void generate_traffic_stats(struct network_traffic network_stats[], struct average_stats *avg)
 {
@@ -150,17 +150,18 @@ void aids_gather_network(void)
 		}
 		for(i = 0; i < aids_conf.network_recent; i++)
 		{
-			network_usage("en1", &traffic, "dst 192.168.1.100 or src 192.168.1.100");
+			network_usage("en1", &traffic, "dst 192.168.1.100 or src 192.168.1.100 or src 192.168.1.109 or dst 192.168.1.109");
+			logger(stdout, DEBUG, "[network.c] in: %.3g, out %.3g\n", traffic.in, traffic.out);
 			memcpy(&recent_traffic[i], &traffic, sizeof(struct network_traffic));
 			sleep(aids_conf.network_sleep_time - 1);
 		}
 		generate_traffic_stats(recent_traffic, &avg);
 		logger(f, DEBUG, "avg:%.3g, var:%.3g, dev:%.3g", avg.average, avg.variance, avg.deviation);
-		logger(stdout, DEBUG, "avg:%.3g, var:%.3g, dev:%.3g", avg.average, avg.variance, avg.deviation);
-		if (avg.average < avg.deviation)
+		logger(stdout, DEBUG, "[network.c] avg:%.3g, var:%.3g, dev:%.3g", avg.average, avg.variance, avg.deviation);
+		if (avg.average > avg.deviation)
 		{
-			send_message("Warning! Network usage weird!");
-			logger(stdout, WARN, "Warning, deviance is large");
+			send_message("[network.c] Warning! Network usage weird!");
+			logger(stdout, WARN, "[network.c] Warning, deviance is large");
 		}
 		fclose(f);
 	}
