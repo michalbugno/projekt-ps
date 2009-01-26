@@ -128,6 +128,26 @@ void generate_traffic_stats(struct network_traffic network_stats[], struct avera
 }
 
 /**
+ * A method for checking whether the averages are raising
+ *
+ * @param averages An array of statistic averages
+ */
+int averages_rising(double averages[])
+{
+	int i, result = 1;
+
+	for(i = 0; i < aids_conf.network_recent-1 ; i++) 
+	{
+		if(averages[i+1] < averages[i]) 
+		{
+			result = 0;
+		}
+	}
+
+	return result;
+}
+
+/**
  * Used to gather network data every defined number of seconds.
  *
  * @see do_run
@@ -136,8 +156,9 @@ void aids_gather_network(void)
 {
 	struct network_traffic traffic;
 	struct network_traffic recent_traffic[aids_conf.network_recent];
+	double averages[aids_conf.network_recent];
 	struct average_stats avg;
-	int i;
+	int i, averages_count = 0;
 	FILE *f;
 
 	while (1)
@@ -156,12 +177,23 @@ void aids_gather_network(void)
 			sleep(aids_conf.network_sleep_time - 1);
 		}
 		generate_traffic_stats(recent_traffic, &avg);
+		averages[averages_count] = avg.average;
+		averages_count++;
 		logger(f, DEBUG, "avg:%.3g, var:%.3g, dev:%.3g", avg.average, avg.variance, avg.deviation);
 		logger(stdout, DEBUG, "[network.c] avg:%.3g, var:%.3g, dev:%.3g", avg.average, avg.variance, avg.deviation);
-		if (avg.average > avg.deviation)
+		if (((0.7)*avg.average) < avg.deviation)
 		{
 			send_message("[network.c] Warning! Network usage weird!");
 			logger(stdout, WARN, "[network.c] Warning, deviance is large");
+		}
+		if (averages_count == aids_conf.network_recent) 
+		{
+			if(averages_rising(averages))
+			{
+				send_message("[network.c] Warning! Network averages are raising constantly");
+				logger(stdout, WARN, "[network.c] warning, averages are raising");
+			}
+			averages_count = 0;
 		}
 		fclose(f);
 	}
