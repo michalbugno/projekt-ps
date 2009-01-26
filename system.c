@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <unistd.h>
+#include <math.h>
 #include <stdlib.h>
 #include <pthread.h>
 #include "system.h"
@@ -37,36 +38,26 @@ int load_average(struct load_average *avg)
 void aids_gather_processor_load(void)
 {
 	struct load_average load;
-	int i,j;
-	FILE* data_file;
+	struct load_average recent_load[aids_conf.processor_recent];
+	struct load_stats avg;
+	int i;
+	FILE* f;
 
 	while (1)
 	{
-		data_file = fopen(aids_conf.processor_recent_data_filename, "w");
-		if (data_file == NULL)
+		f = fopen(aids_conf.processor_global_data_filename, "a");
+		if (f == NULL)
 		{
-			perror("[system.c] Couldn't open file for writing");
+			perror("[system.c] Couldn't open file!");
 			pthread_exit(NULL);
 		}
-		fclose(data_file);
 		for(i = 0; i < aids_conf.processor_recent; i += 1)
 		{
 			load_average(&load);
-			data_file = fopen(aids_conf.processor_recent_data_filename, "a");
-			if (data_file == NULL)
-			{
-				perror("[system.c] Couldn't open file for writing");
-				pthread_exit(NULL);
-			}
-			fprintf(data_file,"%d\n", load.measures);
-			for(j = 0; j < load.measures-1 ; j+=1)
-			{
-				fprintf(data_file,"%lf,", load.data[j]);
-			}
-			fprintf(data_file, "%lf\n", load.data[load.measures-1]);
-			fclose(data_file);
+			memcpy(&recent_load[i], &load, sizeof(struct load_average));
 			sleep(aids_conf.processor_sleep_time);
 		}
+		fclose(f);
 		
 	}
 }
