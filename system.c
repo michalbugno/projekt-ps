@@ -93,7 +93,12 @@ void aids_gather_processor_load(void)
 			sleep(aids_conf.processor_sleep_time);
 		}
 		generate_load_stats(recent_load, &avg);
-		fprintf(stdout, "[system.c] a: %.3g, v: %.3g, stdev: %.3g\n", avg.averages[0], avg.variances[0], avg.deviations[0]);
+		logger(stdout, DEBUG,  "[system.c] a: %.3g, v: %.3g, stdev: %.3g", avg.averages[0], avg.variances[0], avg.deviations[0]);
+		logger(f, DEBUG, "a: %.3g, v: %.3g, stdev: %.3g", avg.averages[0], avg.variances[0], avg.deviations[0]);
+		if(avg.averages[0] < avg.deviations[0]) 
+		{
+
+		}
 		fclose(f);
 		
 	}
