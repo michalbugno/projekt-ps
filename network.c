@@ -101,10 +101,10 @@ void network_usage(const char *dev, struct network_traffic *traffic, const char 
 }
 
 /**
- * A method for counting the standard deviation of the accumulated network traffic data.
+ * A method for computing the statistical data of the accumulated network traffic data.
  *
  * @param network_stats The network statistics to be processed.
- * @param avg Initialized structure for math stats
+ * @param avg Initialized structure for math stats.
  */
 void generate_traffic_stats(struct network_traffic network_stats[], struct average_stats *avg)
 {
@@ -151,13 +151,13 @@ void aids_gather_network(void)
 		}
 		for(i = 0; i < aids_conf.network_recent; i++)
 		{
-			network_usage("en1", &traffic, "src 192.168.1.100");
+			network_usage("en1", &traffic, "src 192.168.1.109");
 			memcpy(&recent_traffic[i], &traffic, sizeof(struct network_traffic));
 			sleep(aids_conf.network_sleep_time);
 		}
 		generate_traffic_stats(recent_traffic, &avg);
 		fprintf(f, "a: %.3g, v: %.3g, d: %.3g\n", avg.average, avg.variance, avg.deviation);
-		fprintf(stdout, "a: %.3g, v: %.3g, d: %.3g\n", avg.average, avg.variance, avg.deviation);
+		fprintf(stdout, "[network.c] a: %.3g, v: %.3g, d: %.3g\n", avg.average, avg.variance, avg.deviation);
 		fclose(f);
 	}
 }

@@ -34,6 +34,11 @@ struct load_stats
 	 */
 	double variances[3];
 
+	/**
+	 * The computed standard deviation for all the 3 measures
+	 */
+	double deviations[3];
+
 };
 
 int load_average(struct load_average *);

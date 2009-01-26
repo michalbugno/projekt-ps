@@ -33,6 +33,35 @@ int load_average(struct load_average *avg)
 }
 
 /**
+ * A function for computing the statistical data for the accumulated load data
+ *
+ * @param load_data An array containing the load data
+ * @param avg Pointer to a load_stats structure to contain the data
+ */
+void generate_load_stats(struct load_average load_data[], struct load_stats *avg) 
+{
+	double single_var;
+	int i;
+	
+
+	for (i = 0 ; i < aids_conf.processor_recent ; i += 1) 
+	{
+		avg -> averages[0] += load_data[0].data[0];
+	}
+	avg -> averages[0] /= aids_conf.processor_recent;
+	
+	for (i = 0; i < aids_conf.processor_recent ; i += 1) 
+	{
+		single_var = ( load_data[0].data[0] - avg -> averages[0] );
+		single_var *= single_var;
+		avg -> variances[0] += single_var;
+	}
+	avg -> variances[0] /= aids_conf.processor_recent;
+
+	avg -> deviations[0] = sqrt(avg -> variances[0]);
+}
+
+/**
  * Infinite loop gathering network data. This method shall be ran threaded.
  */
 void aids_gather_processor_load(void)
@@ -57,6 +86,8 @@ void aids_gather_processor_load(void)
 			memcpy(&recent_load[i], &load, sizeof(struct load_average));
 			sleep(aids_conf.processor_sleep_time);
 		}
+		generate_load_stats(recent_load, &avg);
+		fprintf(stdout, "[system.c] a: %.3g, v: %.3g, stdev: %.3g\n", avg.averages[0], avg.variances[0], avg.deviations[0]);
 		fclose(f);
 		
 	}
