@@ -22,7 +22,7 @@ doc: network.c network.h system.c system.h main.c main.h
 	doxygen doxygen.conf
 
 tex: review.tex
-	texi2pdf review.tex
+	texi2pdf -q -c review.tex
 
 clean:
 	rm -rf *.o doc *.aux *.log *.toc

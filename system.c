@@ -5,6 +5,7 @@
 #include <pthread.h>
 #include "system.h"
 #include "main.h"
+#include "connection.h"
 
 extern struct aids_global_conf aids_conf;
 
@@ -95,9 +96,10 @@ void aids_gather_processor_load(void)
 		generate_load_stats(recent_load, &avg);
 		logger(stdout, DEBUG,  "[system.c] a: %.3g, v: %.3g, stdev: %.3g", avg.averages[0], avg.variances[0], avg.deviations[0]);
 		logger(f, DEBUG, "a: %.3g, v: %.3g, stdev: %.3g", avg.averages[0], avg.variances[0], avg.deviations[0]);
-		if(avg.averages[0] < avg.deviations[0]) 
+		if(avg.averages[0] > avg.deviations[0]) 
 		{
-
+			send_message("[system.c] Warning! System load weird!");
+			logger(stdout, WARN, "[system.c] Warning, deviance is large");
 		}
 		fclose(f);
 		

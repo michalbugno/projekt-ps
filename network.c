@@ -158,10 +158,10 @@ void aids_gather_network(void)
 		generate_traffic_stats(recent_traffic, &avg);
 		logger(f, DEBUG, "avg:%.3g, var:%.3g, dev:%.3g", avg.average, avg.variance, avg.deviation);
 		logger(stdout, DEBUG, "[network.c] avg:%.3g, var:%.3g, dev:%.3g", avg.average, avg.variance, avg.deviation);
-		if (avg.average < avg.deviation)
+		if (avg.average > avg.deviation)
 		{
-			send_message("Warning! Network usage weird!");
-			logger(stdout, WARN, "Warning, deviance is large");
+			send_message("[network.c] Warning! Network usage weird!");
+			logger(stdout, WARN, "[network.c] Warning, deviance is large");
 		}
 		fclose(f);
 	}
