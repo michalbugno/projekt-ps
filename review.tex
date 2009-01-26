@@ -23,4 +23,43 @@
 \begin{document}
 \maketitle
 
+\section{Instalacja/użycie}
+\subsection{Biblioteki}
+\begin{frame}
+	\begin{itemize}
+	\item PCAP (filtr pakietów)
+	\item config (parser plików cfg)
+	\item pthread (wątki)
+	\item strophe (xmpp)
+	\item scons (make w pythonie)
+	\item expat (parser xml)
+	\item resolv, ssl (zależności)
+	\end{itemize}
+\end{frame}
+
+\subsection{Jak?}
+\begin{frame}
+	\begin{itemize}
+	\item zbudować biblioteki
+	\begin{itemize}
+		\item strophe wymaga w folderze \emph{expat} źródeł expat
+		\item strophe należy skompilować z obsługą openssl aby obsługiwać np. GTalk (plik \emph{Sconstruct}, TLS\_PLUGIN=``openssl``)
+	\end{itemize}
+	\item być może ustawić CFLAGS/LDFLAGS ze ścieżkami do plików nagłówkowych/bibliotek
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+\begin{itemize}
+\item \texttt{(sudo?) aids}
+\item \texttt{(sudo?) aids -k}
+\item aids.cfg, aids.pid
+\end{itemize}
+\end{frame}
+
+\section{O systemie}
+\begin{frame}
+System służy do monitorowania obciążenia sieci oraz procesora na maszynach UNIX.
+\end{frame}
+
 \end{document}

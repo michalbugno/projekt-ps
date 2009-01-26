@@ -1,7 +1,7 @@
 CFLAGS = -Wall -I/opt/local/include -L/opt/local/lib
 LDFLAGS = -lpcap -lc -lconfig -lpthread -lstrophe -lexpat -lresolv -lssl
 
-all: aids doc tex
+all: aids doc review.pdf
 
 aids: main.c network.o system.o utils.o connection.o
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
@@ -21,8 +21,9 @@ connection.o: connection.c connection.h
 doc: network.c network.h system.c system.h main.c main.h
 	doxygen doxygen.conf
 
-tex: review.tex
-	texi2pdf review.tex
+review.pdf: review.tex
+	texi2pdf -c review.tex
+	make -C referat
 
 clean:
 	rm -rf *.o doc *.aux *.log *.toc
