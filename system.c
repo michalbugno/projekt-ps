@@ -69,7 +69,7 @@ void aids_gather_processor_load(void)
 	struct load_average load;
 	struct load_average recent_load[aids_conf.processor_recent];
 	struct load_stats avg;
-	int i;
+	int i,j;
 	FILE* f;
 
 	while (1)
@@ -83,6 +83,12 @@ void aids_gather_processor_load(void)
 		for(i = 0; i < aids_conf.processor_recent; i += 1)
 		{
 			load_average(&load);
+			logger(stdout, DEBUG, "%d\n", load.measures);
+			for(j = 0; j < load.measures-1 ; j+=1)
+			{
+				logger(stdout, DEBUG, "%lf,", load.data[j]);
+			}
+			logger(stdout, DEBUG, "%lf\n", load.data[load.measures-1]);
 			memcpy(&recent_load[i], &load, sizeof(struct load_average));
 			sleep(aids_conf.processor_sleep_time);
 		}

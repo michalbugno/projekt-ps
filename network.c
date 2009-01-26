@@ -7,6 +7,7 @@
 #include <arpa/inet.h>
 #include "network.h"
 #include "main.h"
+#include "connection.h"
 
 extern struct aids_global_conf aids_conf;
 /**
@@ -17,7 +18,6 @@ extern struct aids_global_conf aids_conf;
  * @param filter filter description
  *
  * \todo Modify network sniffer to gather in and out data separately.
- * \todo Modify so that it doesn't depend on number of packets received but works for say 1sec
  * \todo Add IP address recognition.
  */
 void network_usage(const char *dev, struct network_traffic *traffic, const char *filter)
@@ -48,7 +48,7 @@ void network_usage(const char *dev, struct network_traffic *traffic, const char 
 
 	if(net == NULL)
 	{
-		fprintf(stderr, "inet_itoa");
+		logger(stderr, ERROR, "inet_itoa fail");
 		return;
 	}
 
@@ -57,7 +57,7 @@ void network_usage(const char *dev, struct network_traffic *traffic, const char 
 	handle = pcap_open_live(dev, 99999, 1, 500, errbuf);
 	if (handle == NULL)
 	{
-		fprintf(stderr, "Couldn't open device %s: %s\n", dev, errbuf);
+		logger(stderr, ERROR, "Couldn't open device %s: %s", dev, errbuf);
 		return;
 	}
 
@@ -68,13 +68,13 @@ void network_usage(const char *dev, struct network_traffic *traffic, const char 
 	 */
 	if(pcap_compile(handle, &fp, filter, 0, netp) == -1)
 	{
-		fprintf(stderr, "[network.c] Error compiling the filter");
+		logger(stderr, ERROR, "[network.c] Error compiling the filter");
 		exit(-1);
 	}
 
 	if(pcap_setfilter(handle, &fp) == -1)
 	{
-		fprintf(stderr, "[network.c] Error setting the filter");
+		logger(stderr, ERROR, "[network.c] Error setting the filter");
 		exit(-1);
 	}
 
@@ -123,8 +123,7 @@ void generate_traffic_stats(struct network_traffic network_stats[], struct avera
 		single_var *= single_var;
 		avg -> variance += single_var;
 	}
-	avg -> variance /= aids_conf.network_recent;
-
+	avg -> variance /= aids_conf.network_recent - 1;
 	avg -> deviation = sqrt(avg -> variance);
 }
 
@@ -146,18 +145,24 @@ void aids_gather_network(void)
 		f = fopen(aids_conf.network_global_data_filename, "a");
 		if (f == NULL)
 		{
-			perror("[network.c] couldn't open file");
+			logger(stderr, ERROR, "[network.c] couldn't open file %s for appending", aids_conf.network_global_data_filename);
 			exit(1);
 		}
 		for(i = 0; i < aids_conf.network_recent; i++)
 		{
-			network_usage("en1", &traffic, "src 192.168.1.109");
+			network_usage("en1", &traffic, "dst 192.168.1.100 or src 192.168.1.100 or src 192.168.1.109 or dst 192.168.1.109");
+			logger(stdout, DEBUG, "[network.c] in: %.3g, out %.3g\n", traffic.in, traffic.out);
 			memcpy(&recent_traffic[i], &traffic, sizeof(struct network_traffic));
-			sleep(aids_conf.network_sleep_time);
+			sleep(aids_conf.network_sleep_time - 1);
 		}
 		generate_traffic_stats(recent_traffic, &avg);
-		fprintf(f, "a: %.3g, v: %.3g, d: %.3g\n", avg.average, avg.variance, avg.deviation);
-		fprintf(stdout, "[network.c] a: %.3g, v: %.3g, d: %.3g\n", avg.average, avg.variance, avg.deviation);
+		logger(f, DEBUG, "avg:%.3g, var:%.3g, dev:%.3g", avg.average, avg.variance, avg.deviation);
+		logger(stdout, DEBUG, "[network.c] avg:%.3g, var:%.3g, dev:%.3g", avg.average, avg.variance, avg.deviation);
+		if (avg.average < avg.deviation)
+		{
+			send_message("Warning! Network usage weird!");
+			logger(stdout, WARN, "Warning, deviance is large");
+		}
 		fclose(f);
 	}
 }

@@ -3,6 +3,7 @@
 
 #include <pthread.h>
 #include <libconfig.h>
+#include "utils.h"
 
 /**
  * Total number of threads in application.
@@ -77,6 +78,9 @@ struct aids_global_conf
 	 * @see eradicate
 	 */
 	char *pid_file;
+	char *jabber_id;
+	char *jabber_pass;
+	char *jabber_receiver_id;
 };
 
 /**
