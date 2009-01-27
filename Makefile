@@ -22,7 +22,7 @@ doc: network.c network.h system.c system.h main.c main.h
 	doxygen doxygen.conf
 
 review.pdf: review.tex
-	texi2pdf -c -q review.tex
+	texi2pdf -c review.tex
 	make -C referat
 
 clean:

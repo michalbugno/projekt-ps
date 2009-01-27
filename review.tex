@@ -26,6 +26,7 @@
 \section{Instalacja/użycie}
 \subsection{Biblioteki}
 \begin{frame}
+\frametitle{Biblioteki}
 	\begin{itemize}
 	\item PCAP (filtr pakietów)
 	\item config (parser plików cfg)
@@ -39,6 +40,7 @@
 
 \subsection{Jak?}
 \begin{frame}
+\frametitle{Kompilacja}
 	\begin{itemize}
 	\item zbudować biblioteki
 	\begin{itemize}
@@ -49,17 +51,36 @@
 	\end{itemize}
 \end{frame}
 
+\subsection{Konfiguracja}
 \begin{frame}
-\begin{itemize}
-\item \texttt{(sudo?) aids}
-\item \texttt{(sudo?) aids -k}
-\item aids.cfg, aids.pid
-\end{itemize}
+\frametitle{Konfiguracja}
+	\begin{itemize}
+	\item \texttt{(sudo?) aids}
+	\item \texttt{(sudo?) aids -k}
+	\item aids.cfg, aids.pid
+	\item pid\_file
+	\item jabber\_id, jabber\_password
+	\item sleep\_time, recent\_data
+	\end{itemize}
 \end{frame}
 
-\section{O systemie}
 \begin{frame}
+\frametitle{Flow}
 System służy do monitorowania obciążenia sieci oraz procesora na maszynach UNIX.
+
+Flow
+\begin{itemize}
+\item start systemu (fork demona, pid zachowany do pliku)
+\item wczytanie konfiguracji
+\item powtarzane
+\begin{itemize}
+\item uruchomienie wątków zbierających dane (sieć/load)
+\item analiza ostatnich n wczytanych danych
+\item analiza wartości średnich zachowanych do pliku
+\item ewentualne powiadomienie
+\end{itemize}
+\item aids -k (wczytuje pid, zabija proces)
+\end{itemize}
 \end{frame}
 
 \end{document}
