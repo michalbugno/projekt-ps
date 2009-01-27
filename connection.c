@@ -36,6 +36,12 @@ void conn_handler(xmpp_conn_t * const conn, const xmpp_conn_event_t status, cons
 	}
 }
 
+/**
+ * Send message using XMPP protocol.
+ *
+ * @param msg message to send
+ * @see aids_conf
+ */
 void send_message(char *msg)
 {
 	xmpp_ctx_t *ctx;

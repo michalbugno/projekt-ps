@@ -4,6 +4,14 @@
 #include <sys/time.h>
 #include "utils.h"
 
+/**
+ * Logger is used to write any kind of messages to file descriptors.
+ * Useful with debugging etc.
+ *
+ * @param file file descriptor to which messages should be written
+ * @param level level of message (defined in header: DEBUG, INFO, WARN, ERROR)
+ * @param format exactly as in printf
+ */
 void logger(FILE *file, int level, const char *format, ...)
 {
 	va_list ap;

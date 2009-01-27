@@ -83,6 +83,9 @@ int system_averages_rising(double averages[])
 
 /**
  * Infinite loop gathering network data. This method shall be ran threaded.
+ * Writes gathered data to file, analyses it and sends appropriate warnings
+ * if something is suspicious.
+ * Filename and sleep time are taken from configuration file.
  */
 void aids_gather_processor_load(void)
 {

@@ -18,7 +18,7 @@ utils.o: utils.c utils.h
 connection.o: connection.c connection.h
 	$(CC) $(CFLAGS) -c -o $@ $*.c
 
-doc: network.c network.h system.c system.h main.c main.h
+doc: network.c network.h system.c system.h main.c main.h connection.c connection.h utils.c utils.h
 	doxygen doxygen.conf
 
 review.pdf: review.tex

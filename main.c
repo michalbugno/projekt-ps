@@ -14,12 +14,26 @@
  * AIDS is anomaly Intrusion Detection System. It runs as a daemon which gathers
  * data and writes it to files.
  *
- * \section authors Authors
- * Michal Bugno
- * Antek Piechnik
+ * Main flow:
+ * <ol>
+ * <li> Run daemon</li>
+ * <li> while deamon is alive</li>
+ * <ol>
+ * <li> gather network flow</li>
+ * <li> gather processor load</li>
+ * <li> analyze (and send warnings if something is suspicious)</li>
+ * </ol>
+ * </ol>
  *
+ * <p>Analysis</p>
+ * Based on recent results check the standard deviation and compare it to
+ * average. If it exceeds the average send warning.
  *
- * \todo Roughly: analize gathered data.
+ * Based on last n average results check whether there is growing tendency
+ * and if true, send warning.
+ *
+ * \author Michal Bugno Antek Piechnik
+ *
  */
 
 /**

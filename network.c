@@ -148,7 +148,8 @@ int averages_rising(double averages[])
 }
 
 /**
- * Used to gather network data every defined number of seconds.
+ * Used to gather network data every defined number of seconds. Shall be run threaded.
+ * Writes and analyses gathered data sending warnings if necessary.
  *
  * @see do_run
  */
